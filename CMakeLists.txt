@@ -7,7 +7,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(Vendor/glfw)
 
-include_directories(Vendor/glm/glm Vendor/glfw/include Vendor/glad/include)
+include_directories(Vendor/glm/glm Vendor/glfw/include Vendor/glad/include Vendor/antlr/runtime)
 
 add_subdirectory(Vendor/glm)
 
@@ -16,4 +16,4 @@ add_executable(CS655 main.cpp)
 
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(CS655 PRIVATE glfw OpenGL::GL GLAD glm::glm)
+target_link_libraries(CS655 PRIVATE glfw OpenGL::GL GLAD glm::glm Vendor/antlr/lib/libantlr4-runtime.a)
