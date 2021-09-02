@@ -35,7 +35,7 @@ namespace glm
 	/// @{
 
 	//! Compute the intersection of a ray and a plane.
-	//! Ray direction and plane normal must be unit length.
+	//! Rays direction and plane normal must be unit length.
 	//! From GLM_GTX_intersect extension.
 	template<typename genType>
 	GLM_FUNC_DECL bool intersectRayPlane(
