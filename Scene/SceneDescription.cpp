@@ -4,7 +4,9 @@
 
 #include "SceneDescription.h"
 
-SceneDescription::SceneDescription() {}
+#include <utility>
+
+SceneDescription::SceneDescription() = default;
 
 const glm::dvec3 &SceneDescription::getBackground() const {
     return _background;
@@ -30,26 +32,35 @@ void SceneDescription::setAmbientFac(double ambientFac) {
     _ambientFac = ambientFac;
 }
 
-const Camera &SceneDescription::getCamera() const {
+std::shared_ptr<Camera> SceneDescription::getCamera() const {
     return _camera;
 }
 
-void SceneDescription::setCamera(const Camera &camera) {
-    _camera = camera;
+void SceneDescription::setCamera(std::shared_ptr<Camera> camera) {
+    _camera = std::move(camera);
 }
 
-const std::vector<std::unique_ptr<BaseRenderable>> &SceneDescription::getObjects() const {
+const std::vector<std::shared_ptr<BaseRenderable>> &SceneDescription::getObjects() const {
     return _objects;
 }
 
-void SceneDescription::setObjects(const std::vector<std::unique_ptr<BaseRenderable>> &objects) {
-    _objects = objects;
-}
 
-const std::vector<std::unique_ptr<Light>> &SceneDescription::getLights() const {
+const std::vector<std::shared_ptr<Light>> &SceneDescription::getLights() const {
     return _lights;
 }
 
-void SceneDescription::setLights(const std::vector<std::unique_ptr<Light>> &lights) {
-    _lights = lights;
+void SceneDescription::pushObject(const std::shared_ptr<BaseRenderable>& object) {
+    _objects.push_back(object);
+}
+
+void SceneDescription::pushLight(const std::shared_ptr<Light>& light) {
+    _lights.push_back(light);
+}
+
+void SceneDescription::insertMaterial(int num, const std::shared_ptr<Material>& material) {
+    _materials.insert(std::make_pair(num, material));
+}
+
+const std::unordered_map<int, std::shared_ptr<Material>> &SceneDescription::getMaterials() const {
+    return _materials;
 }

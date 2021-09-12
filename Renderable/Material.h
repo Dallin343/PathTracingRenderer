@@ -5,18 +5,27 @@
 #ifndef CS655_MATERIAL_H
 #define CS655_MATERIAL_H
 
-#include "Common.h"
+#include <glm.hpp>
 
 class Material {
 private:
-    double diffuse_fac, specular_fac, ambient_fac;
-    glm::dvec3 diffuse_color, specular_color;
-    double gloss;
+    double _diffuseFac, _transmissionFac, _phongConst;
+    glm::dvec3 _diffuseColor, _specularColor;
 public:
     Material();
 
-    Material(double diffuseFac, double specularFac, double ambientFac, const glm::dvec3 &diffuseColor,
-             const glm::dvec3 &specularColor, double gloss);
+    Material(double diffuseFac, double transmissionFac, double phongConst, const glm::dvec3 &diffuseColor,
+             const glm::dvec3 &specularColor);
+
+    double getDiffuseFac() const;
+
+    double getTransmissionFac() const;
+
+    double getPhongConst() const;
+
+    const glm::dvec3 &getDiffuseColor() const;
+
+    const glm::dvec3 &getSpecularColor() const;
 };
 
 

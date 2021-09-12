@@ -7,17 +7,17 @@
 
 #include "BaseRenderable.h"
 
-class Sphere: BaseRenderable {
+class Sphere: public BaseRenderable {
 private:
     glm::dvec3 _origin;
     double _radius;
 public:
-    Sphere(Material* material, glm::dvec3 origin, double radius);
+    Sphere(std::shared_ptr<Material> material, glm::dvec3 origin, double radius);
 
 private:
-    std::optional<std::shared_ptr<Rays::Hit>> Intersect(const Rays::Ray& ray) override;
+    std::optional<std::shared_ptr<Rays::Hit>> Intersect(std::shared_ptr<Rays::Ray> ray) override;
 
-    const Material &GetMaterial() override;
+    std::shared_ptr<Material> GetMaterial() override;
 };
 
 

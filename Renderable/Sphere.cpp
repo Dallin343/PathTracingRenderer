@@ -5,7 +5,7 @@
 #include "Sphere.h"
 #include <glm.hpp>
 
-std::optional<std::shared_ptr<Rays::Hit>> Sphere::Intersect(const Rays::Ray &ray) {
+std::optional<std::shared_ptr<Rays::Hit>> Sphere::Intersect(std::shared_ptr<Rays::Ray> ray) {
     glm::dvec3 oc = _origin - ray.getOrigin();
     double adj = glm::dot(oc, ray.getDirection());
 
@@ -35,9 +35,9 @@ std::optional<std::shared_ptr<Rays::Hit>> Sphere::Intersect(const Rays::Ray &ray
     return std::make_shared<Rays::Hit>(t, point, norm);
 }
 
-const Material &Sphere::GetMaterial() {
-    return *_material;
+std::shared_ptr<Material> Sphere::GetMaterial() {
+    return _material;
 }
 
-Sphere::Sphere(Material *material, glm::dvec3 origin, double radius) : BaseRenderable(material), _origin(origin),
+Sphere::Sphere(std::shared_ptr<Material> material, glm::dvec3 origin, double radius) : BaseRenderable(material), _origin(origin),
                                                                             _radius(radius) {}

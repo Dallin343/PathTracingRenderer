@@ -31,3 +31,7 @@ const glm::dvec2 &Camera::getFov() const {
 void Camera::setFov(const glm::dvec2 &fov) {
     _fov = fov;
 }
+
+glm::dvec2 Camera::getViewportSize() {
+    return (_fov * M_PI/180.0) * (_lookFrom - _lookAt).z;
+}

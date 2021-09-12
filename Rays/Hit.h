@@ -27,6 +27,9 @@ namespace Rays {
         const glm::dvec3 &getNorm() const;
 
         void setNorm(const glm::dvec3 &norm);
+
+        double distanceTo(const glm::dvec3& other);
+        glm::dvec3 vectorTo(const glm::dvec3& other);
     };
 }
 

@@ -9,18 +9,13 @@
 #include <glm/vec3.hpp>
 
 namespace Rays {
-    enum Type {
-        Camera,
-        Illumination
-    };
 
     class Ray {
     protected:
         glm::dvec3 _origin;
         glm::dvec3 _direction;
-        Type _type;
     public:
-        Ray(const glm::dvec3 &origin, const glm::dvec3 &direction, const Type type);
+        Ray(const glm::dvec3 &origin, const glm::dvec3 &direction);
 
         const glm::dvec3 &getOrigin() const;
 
@@ -29,10 +24,19 @@ namespace Rays {
         const glm::dvec3 &getDirection() const;
 
         void setDirection(const glm::dvec3 &direction);
+    };
 
-        const Type &getType() const;
-
-        void setType(const Type &type);
+    class CameraRay: public Ray {
+    public:
+        CameraRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
+    };
+    class IlluminationRay: public Ray {
+    public:
+        IlluminationRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
+    };
+    class ReflectionRay: public Ray {
+    public:
+        ReflectionRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
     };
 }
 

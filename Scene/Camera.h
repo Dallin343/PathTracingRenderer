@@ -27,6 +27,8 @@ public:
     const glm::dvec2 &getFov() const;
 
     void setFov(const glm::dvec2 &fov);
+
+    glm::dvec2 getViewportSize();
 };
 
 

@@ -29,3 +29,11 @@ const glm::dvec3 &Rays::Hit::getNorm() const {
 void Rays::Hit::setNorm(const glm::dvec3 &norm) {
     _norm = norm;
 }
+
+double Rays::Hit::distanceTo(const glm::dvec3 &other) {
+    return glm::distance(_point, other);
+}
+
+glm::dvec3 Rays::Hit::vectorTo(const glm::dvec3 & other) {
+    return glm::normalize(other - _point);
+}
