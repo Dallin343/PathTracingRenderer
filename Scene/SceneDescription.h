@@ -16,10 +16,10 @@ class SceneDescription {
 private:
     glm::dvec3 _background{}, _ambientColor{};
     double _ambientFac{};
-    std::shared_ptr<Camera> _camera;
-    std::vector<std::shared_ptr<BaseRenderable>> _objects;
-    std::vector<std::shared_ptr<Light>> _lights;
-    std::unordered_map<int, std::shared_ptr<Material>> _materials;
+    std::unique_ptr<Camera> _camera;
+    std::vector<std::unique_ptr<BaseRenderable>> _objects;
+    std::vector<std::unique_ptr<Light>> _lights;
+    std::unordered_map<int, std::unique_ptr<Material>> _materials;
 public:
     SceneDescription();
 
@@ -35,21 +35,21 @@ public:
 
     void setAmbientFac(double ambientFac);
 
-    std::shared_ptr<Camera> getCamera() const;
+    Camera* getCamera() const;
 
-    void setCamera(std::shared_ptr<Camera> camera);
+    void setCamera(std::unique_ptr<Camera> camera);
 
-    const std::vector<std::shared_ptr<BaseRenderable>> &getObjects() const;
+    const std::vector<std::unique_ptr<BaseRenderable>> &getObjects() const;
 
-    void pushObject(const std::shared_ptr<BaseRenderable>& object);
+    void pushObject(std::unique_ptr<BaseRenderable> object);
 
-    const std::vector<std::shared_ptr<Light>> &getLights() const;
+    const std::vector<std::unique_ptr<Light>> &getLights() const;
 
-    void pushLight(const std::shared_ptr<Light>& light);
+    void pushLight(std::unique_ptr<Light> light);
 
-    const std::unordered_map<int, std::shared_ptr<Material>> &getMaterials() const;
+    const std::unordered_map<int, std::unique_ptr<Material>> &getMaterials() const;
 
-    void insertMaterial(int num, const std::shared_ptr<Material>& material);
+    void insertMaterial(int num, std::unique_ptr<Material> material);
 };
 
 

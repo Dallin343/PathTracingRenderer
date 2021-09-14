@@ -10,11 +10,11 @@
 
 class MySDFVisitor: antlrcpp::SDFBaseVisitor {
 private:
-    std::shared_ptr<SceneDescription> _sceneDescription;
+    std::unique_ptr<SceneDescription> _sceneDescription;
 public:
     MySDFVisitor();
 
-    const std::shared_ptr<SceneDescription> &getSceneDescription() const;
+    std::unique_ptr<SceneDescription> takeSceneDescription();
 
     antlrcpp::Any visitScene(antlrcpp::SDFParser::SceneContext *ctx) override;
 

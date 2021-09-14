@@ -15,7 +15,7 @@ private:
 public:
     MySDFParser();
 
-    std::shared_ptr<SceneDescription> parse(std::ifstream& src);
+    std::unique_ptr<SceneDescription> parse(std::ifstream& src);
 
 };
 

@@ -3,26 +3,13 @@
 //
 
 #include <array>
+#include <algorithm>
+#include <fstream>
 #include "Renderer.h"
 
-void Renderer::render(const std::shared_ptr<SceneDescription> &scene, const std::string &outputFile) {
-    _scene = scene;
-    auto image = std::array<std::array<glm::dvec3, 480>, 480>();
-
-    const glm::dvec3 from = _scene->getCamera()->getLookFrom();
-
-    for (uint32_t col = 0; col < 1000; col++) {
-        for (uint32_t row = 0; row < 1000; row++) {
-            auto dirs = _getWorldspaceCoords(col, row, 1000, 1000);
-
-            glm::dvec3 color = {0.0, 0.0, 0.0};
-            for (const glm::dvec3 &dir: dirs) {
-                auto camRay = std::make_shared<Rays::CameraRay>(from, glm::normalize(dir - from));
-                color += _traceRay(camRay, 0);
-            }
-            image[row][col] = color / 4.0;
-        }
-    }
+void Renderer::render(std::unique_ptr<SceneDescription> scene, const std::string &outputFile) {
+    _scene = std::move(scene);
+    render(outputFile);
 }
 
 std::array<glm::dvec3, 4> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height) {
@@ -36,18 +23,22 @@ std::array<glm::dvec3, 4> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j,
     double v = j * jStep + (jStep / 2.0) - viewport.y;
 
     auto subPixels = std::array<glm::dvec3, 4>();
-    subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
-    subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
-    subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
-    subPixels[3] = glm::dvec3(u - iCorner, v - jCorner, 0.0);
+    subPixels[0] = {u, v, 0.0};
     return subPixels;
+//    subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
+//    subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
+//    subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
+//    subPixels[3] = glm::dvec3(u - iCorner, v - jCorner, 0.0);
+//    return subPixels;
 }
 
-glm::dvec3 Renderer::_traceRay(const std::shared_ptr<Rays::CameraRay> &ray, uint8_t depth = 0) {
-    std::vector<std::pair<std::shared_ptr<BaseRenderable>, std::shared_ptr<Rays::Hit>>> hits;
+glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth = 0) {
+    std::vector<std::pair<const std::unique_ptr<BaseRenderable> &, std::unique_ptr<Rays::Hit>>> hits;
     for (const auto &object: _scene->getObjects()) {
-        std::optional<std::shared_ptr<Rays::Hit>> hit = object->Intersect(ray);
-        hits.emplace_back(object, hit.value());
+        std::optional<std::unique_ptr<Rays::Hit>> hit = object->Intersect(ray);
+        if (hit.has_value()) {
+            hits.emplace_back(object, std::move(hit.value()));
+        }
     }
 
     if (hits.empty()) {
@@ -55,47 +46,93 @@ glm::dvec3 Renderer::_traceRay(const std::shared_ptr<Rays::CameraRay> &ray, uint
     }
 
     double min = -1.0;
-    std::pair<std::shared_ptr<BaseRenderable>, std::shared_ptr<Rays::Hit>> closest;
-    for (const auto &pair: hits) {
+    int closest;
+    for (int i = 0; i < hits.size(); i++) {
+        auto &pair = hits.at(i);
         auto distance = pair.second->distanceTo(ray->getOrigin());
         if (distance < min || min == -1) {
             min = distance;
-            closest = pair;
+            closest = i;
         }
     }
+    auto &found = hits.at(closest);
+    auto &object = found.first;
+    auto hit = std::move(found.second);
 
-    auto object = closest.first;
-    auto hit = closest.second;
-
-    std::shared_ptr<Material> material = closest.first->GetMaterial();
+    const Material* material = object->GetMaterial();
     glm::dvec3 finalColor = {0.0, 0.0, 0.0};
     glm::dvec3 reflectiveColor = {0.0, 0.0, 0.0};
 
     // Reflection Rays
     auto currentDir = ray->getDirection();
     auto nrm = hit->getNorm();
-    double e = 0.00001;
+    double e = 0.0001;
 
-    if (depth < MAX_DEPTH) {
+    if (material->getSpecularFac() > 0.0 && depth < MAX_DEPTH) {
         glm::dvec3 reflectionDir = glm::normalize(currentDir - nrm * 2.0 * glm::dot(currentDir, nrm));
-        auto reflectionRay = std::make_shared<Rays::CameraRay>(hit->getPoint() + nrm * e, reflectionDir);
-        reflectiveColor += _traceRay(reflectionRay, depth + 1);
+        auto reflectionRay = std::make_unique<Rays::CameraRay>(hit->getPoint() + nrm * e, reflectionDir);
+        reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
     }
 
-    std::vector<std::shared_ptr<Light>> lights = _scene->getLights();
+    auto &lights = _scene->getLights();
 
-    std::for_each(lights.begin(),  lights.end(), [&](const std::shared_ptr<Light>& light) {
-        glm::dvec3 diffuse = light->calculateDiffuse(ray, hit, material, _scene);
-        glm::dvec3 specular = light->calculateSpecular(ray, hit, material, _scene);
+    std::for_each(lights.begin(), lights.end(), [&](const std::unique_ptr<Light> &light) {
+        glm::dvec3 diffuse = light->calculateDiffuse(ray, hit.get(), material, _scene->getObjects());
+        glm::dvec3 specular = light->calculateSpecular(ray, hit.get(), material, _scene->getObjects(), _scene->getCamera());
 
         // TEMPORARY
         finalColor += diffuse + specular;
     });
 
-    return finalColor;
+    finalColor += _scene->getAmbientColor() * material->getDiffuseColor() * _scene->getAmbientFac();
+    return glm::clamp(finalColor, 0.0, 1.0);
 }
 
-glm::dvec3 Renderer::_traceRay(std::shared_ptr<Rays::IlluminationRay> ray) {
+glm::dvec3 Renderer::_traceRay(Rays::IlluminationRay *ray) {
     return glm::dvec3();
 }
+
+void Renderer::render(const std::string &outputFile) {
+    const int width = 480;
+    const int height = 480;
+    auto image = std::vector<std::vector<glm::ivec3>>();
+    image.resize(height);
+
+
+    const glm::dvec3 from = _scene->getCamera()->getLookFrom();
+
+    for (uint32_t col = 0; col < width; col++) {
+        for (uint32_t row = 0; row < height; row++) {
+            auto dirs = _getWorldspaceCoords(col, row, width, height);
+
+            glm::dvec3 color = {0.0, 0.0, 0.0};
+            auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dirs[0] - from));
+            color += _traceRay(camRay.get(), 0);
+//            for (const glm::dvec3 &dir: dirs) {
+//                std::unique_ptr<Rays::Ray> camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
+//                color += _traceRay(camRay, 0);
+//            }
+            glm::dvec3 avg = color;
+            image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
+        }
+    }
+
+    std::ofstream stream(outputFile);
+
+    stream << "P3" << std::endl << width << " " << height << std::endl << "255" << std::endl;
+    for (const auto &row: image) {
+        for (const auto &col: row) {
+            stream << col.x << " " << col.y << " " << col.z << " ";
+        }
+        stream << std::endl;
+    }
+    stream.close();
+}
+
+
+Renderer::Renderer(std::unique_ptr<SceneDescription> scene) {
+    this->_scene = std::move(scene);
+}
+
+Renderer::Renderer() = default;
 

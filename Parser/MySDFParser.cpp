@@ -9,14 +9,14 @@
 #include "MySDFVisitor.h"
 
 using namespace antlr4;
-std::shared_ptr<SceneDescription> MySDFParser::parse(std::ifstream& src) {
+std::unique_ptr<SceneDescription> MySDFParser::parse(std::ifstream& src) {
     ANTLRInputStream input(src);
     antlrcpp::SDFLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
     antlrcpp::SDFParser parser(&tokens);
 
     _visitor->visitScene(parser.scene());
-    return _visitor->getSceneDescription();
+    return _visitor->takeSceneDescription();
 }
 
 MySDFParser::MySDFParser(): _visitor(std::make_unique<MySDFVisitor>()) {}

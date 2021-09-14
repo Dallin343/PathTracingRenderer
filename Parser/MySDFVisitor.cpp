@@ -33,16 +33,16 @@ antlrcpp::Any MySDFVisitor::visitCamera(antlrcpp::SDFParser::CameraContext *ctx)
     glm::dvec3 lookFrom = visitPoint3(ctx->lf);
     glm::dvec3 lookAt = visitPoint3(ctx->la);
 
-    auto camera = std::make_shared<Camera>(lookFrom, lookAt, fov);
-    _sceneDescription->setCamera(camera);
+    auto camera = std::make_unique<Camera>(lookFrom, lookAt, fov);
+    _sceneDescription->setCamera(std::move(camera));
     return camera;
 }
 
 antlrcpp::Any MySDFVisitor::visitDirectionalLight(antlrcpp::SDFParser::DirectionalLightContext *ctx) {
     glm::dvec3 color = visitRgb(ctx->rgb());
     glm::dvec3 pos = visitPoint3(ctx->point3());
-    std::shared_ptr<Light> light = std::make_shared<DirectionalLight>(pos, color);
-    _sceneDescription->pushLight(light);
+    std::unique_ptr<Light> light = std::make_unique<DirectionalLight>(pos, color);
+    _sceneDescription->pushLight(std::move(light));
     return light;
 }
 
@@ -64,10 +64,11 @@ antlrcpp::Any MySDFVisitor::visitMaterial(antlrcpp::SDFParser::MaterialContext *
     glm::dvec3 ksRgb = visitRgb(ctx->ks_rgb);
     double n = std::stod(ctx->n->getText());
     double kd = std::stod(ctx->kd->getText());
+    double ks = std::stod(ctx->ks->getText());
     double kt = std::stod(ctx->kt->getText());
 
-    auto mat = std::make_shared<Material>(kd, kt, n, kdRgb, ksRgb);
-    _sceneDescription->insertMaterial(num, mat);
+    auto mat = std::make_unique<Material>(kd, ks, kt, n, kdRgb, ksRgb);
+    _sceneDescription->insertMaterial(num, std::move(mat));
     return mat;
 }
 
@@ -76,9 +77,9 @@ antlrcpp::Any MySDFVisitor::visitSphere(antlrcpp::SDFParser::SphereContext *ctx)
     double radius = std::stod(ctx->radius->getText());
     int mat_num = std::stoi(ctx->mat_num->getText());
 
-    auto material = _sceneDescription->getMaterials().at(mat_num);
-    auto sphere = std::make_shared<Sphere>(material, origin, radius);
-    _sceneDescription->pushObject(sphere);
+    auto& material = _sceneDescription->getMaterials().at(mat_num);
+    auto sphere = std::make_unique<Sphere>(material, origin, radius);
+    _sceneDescription->pushObject(std::move(sphere));
     return sphere;
 }
 
@@ -133,9 +134,9 @@ antlrcpp::Any MySDFVisitor::visitRgb(antlrcpp::SDFParser::RgbContext *ctx) {
     return glm::dvec3(r, g, b);
 }
 
-const std::shared_ptr<SceneDescription> &MySDFVisitor::getSceneDescription() const {
-    return _sceneDescription;
+std::unique_ptr<SceneDescription> MySDFVisitor::takeSceneDescription() {
+    return std::move(_sceneDescription);
 }
 
-MySDFVisitor::MySDFVisitor(): _sceneDescription(std::make_shared<SceneDescription>()) {}
+MySDFVisitor::MySDFVisitor(): _sceneDescription(std::make_unique<SceneDescription>()) {}
 

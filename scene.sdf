@@ -1,6 +1,7 @@
-BACKGROUND 100 100 100
-AMBIENT 0.5 125 125 125
-DIRECTIONAL_LIGHT 5.0 0.0 0.0 255 255 255
-MATERIAL 1 255 0 0 255 255 255 10.0 1.0 0.0
-SPHERE 1 0.0 0.0 0.0 2.0
-CAMERA 0.0 0.0 5.0 0.0 0.0 0.0 60.0 60.0
+BACKGROUND color 0.5 0.5 0.5
+AMBIENT fac 0.2 color 0.5 0.5 0.5
+DIRECTIONAL_LIGHT direction 4.0 4.0 2.0 color 1.0 1.0 1.0
+MATERIAL mat_num 1 kd 0.8 0.0 0.0 ks 1.0 1.0 1.0 phong 10.0 kd_fac 0.8 ks_fac 0.8 kt_fac 0.0
+SPHERE mat_num 1 origin 0.0 0.0 0.0 radius 2.0
+SPHERE mat_num 1 origin 2.0 2.0 1.0 radius 0.5
+CAMERA look_from 0.0 0.0 5.0 look_at 0.0 0.0 0.0 fov 60.0 60.0

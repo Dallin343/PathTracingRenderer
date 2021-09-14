@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "Parser/MySDFParser.h"
+#include "Renderer.h"
 
 int main(int argc, const char* argv[]) {
     std::ifstream stream;
@@ -9,8 +10,11 @@ int main(int argc, const char* argv[]) {
         std::cerr << "Could not open file: " << argv[1] << std::endl;
         return 1;
     }
-    MySDFParser parser;
-    std::shared_ptr<SceneDescription> scene = parser.parse(stream);
+    auto parser = new MySDFParser();
+    std::unique_ptr<SceneDescription> scene = parser->parse(stream);
 
+    const std::string path = "/home/dallin/Desktop/output.ppm";
+    auto renderer = Renderer(std::move(scene));
+    renderer.render(path);
     return 0;
 }

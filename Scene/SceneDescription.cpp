@@ -32,35 +32,35 @@ void SceneDescription::setAmbientFac(double ambientFac) {
     _ambientFac = ambientFac;
 }
 
-std::shared_ptr<Camera> SceneDescription::getCamera() const {
-    return _camera;
+Camera* SceneDescription::getCamera() const {
+    return _camera.get();
 }
 
-void SceneDescription::setCamera(std::shared_ptr<Camera> camera) {
+void SceneDescription::setCamera(std::unique_ptr<Camera> camera) {
     _camera = std::move(camera);
 }
 
-const std::vector<std::shared_ptr<BaseRenderable>> &SceneDescription::getObjects() const {
+const std::vector<std::unique_ptr<BaseRenderable>> &SceneDescription::getObjects() const {
     return _objects;
 }
 
 
-const std::vector<std::shared_ptr<Light>> &SceneDescription::getLights() const {
+const std::vector<std::unique_ptr<Light>> &SceneDescription::getLights() const {
     return _lights;
 }
 
-void SceneDescription::pushObject(const std::shared_ptr<BaseRenderable>& object) {
-    _objects.push_back(object);
+void SceneDescription::pushObject(std::unique_ptr<BaseRenderable> object) {
+    _objects.push_back(std::move(object));
 }
 
-void SceneDescription::pushLight(const std::shared_ptr<Light>& light) {
-    _lights.push_back(light);
+void SceneDescription::pushLight(std::unique_ptr<Light> light) {
+    _lights.push_back(std::move(light));
 }
 
-void SceneDescription::insertMaterial(int num, const std::shared_ptr<Material>& material) {
-    _materials.insert(std::make_pair(num, material));
+void SceneDescription::insertMaterial(int num, std::unique_ptr<Material> material) {
+    _materials.insert(std::make_pair(num, std::move(material)));
 }
 
-const std::unordered_map<int, std::shared_ptr<Material>> &SceneDescription::getMaterials() const {
+const std::unordered_map<int, std::unique_ptr<Material>> &SceneDescription::getMaterials() const {
     return _materials;
 }

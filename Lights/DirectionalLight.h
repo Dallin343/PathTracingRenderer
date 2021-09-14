@@ -7,15 +7,20 @@
 
 #include "Light.h"
 
-class DirectionalLight: public Light {
+class DirectionalLight : public Light {
+protected:
+    bool _inShadow(const Rays::IlluminationRay *,
+                   const std::vector<std::unique_ptr<BaseRenderable>> &) override;
+
 public:
     DirectionalLight(const glm::dvec3 &position, const glm::dvec3 &color);
 
-    glm::dvec3 calculateDiffuse(const std::shared_ptr<Rays::Ray> &, const std::shared_ptr<Rays::Hit> &,
-                                const std::shared_ptr<Material> &, const std::shared_ptr<SceneDescription>&) override;
+    glm::dvec3 calculateDiffuse(const Rays::Ray *, const Rays::Hit *, const Material *,
+                                const std::vector<std::unique_ptr<BaseRenderable>> &) override;
 
-    glm::dvec3 calculateSpecular(const std::shared_ptr<Rays::Ray> &, const std::shared_ptr<Rays::Hit> &,
-                                 const std::shared_ptr<Material> &, const std::shared_ptr<SceneDescription>&) override;
+    glm::dvec3 calculateSpecular(const Rays::Ray *, const Rays::Hit *, const Material *,
+                                 const std::vector<std::unique_ptr<BaseRenderable>> &,
+                                 const Camera *) override;
 };
 
 

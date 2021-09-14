@@ -14,12 +14,12 @@
 
 class BaseRenderable {
 protected:
-    std::shared_ptr<Material> _material;
+    const std::unique_ptr<Material>& _material;
 public:
-    explicit BaseRenderable(std::shared_ptr<Material> material) : _material(material) {}
+    explicit BaseRenderable(const std::unique_ptr<Material>& material) : _material(material) {}
 
-    virtual std::optional<std::shared_ptr<Rays::Hit>> Intersect(std::shared_ptr<Rays::Ray> ray) = 0;
-    virtual std::shared_ptr<Material> GetMaterial() = 0;
+    virtual std::optional<std::unique_ptr<Rays::Hit>> Intersect(const Rays::Ray* ray) = 0;
+    virtual const Material* GetMaterial() = 0;
 };
 
 
