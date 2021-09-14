@@ -23,13 +23,13 @@ std::array<glm::dvec3, 4> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j,
     double v = j * jStep + (jStep / 2.0) - viewport.y;
 
     auto subPixels = std::array<glm::dvec3, 4>();
-    subPixels[0] = {u, v, 0.0};
-    return subPixels;
-//    subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
-//    subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
-//    subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
-//    subPixels[3] = glm::dvec3(u - iCorner, v - jCorner, 0.0);
+//    subPixels[0] = {u, v, 0.0};
 //    return subPixels;
+    subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
+    subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
+    subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
+    subPixels[3] = glm::dvec3(u - iCorner, v - jCorner, 0.0);
+    return subPixels;
 }
 
 glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth = 0) {
@@ -68,7 +68,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth = 0) {
     auto nrm = hit->getNorm();
     double e = 0.0001;
 
-    if (material->getSpecularFac() > 0.0 && depth < MAX_DEPTH) {
+    if (material->getReflectiveFac() > 0.0 && depth < MAX_DEPTH) {
         glm::dvec3 reflectionDir = glm::normalize(currentDir - nrm * 2.0 * glm::dot(currentDir, nrm));
         auto reflectionRay = std::make_unique<Rays::CameraRay>(hit->getPoint() + nrm * e, reflectionDir);
         reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
@@ -85,6 +85,8 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth = 0) {
     });
 
     finalColor += _scene->getAmbientColor() * material->getDiffuseColor() * _scene->getAmbientFac();
+
+    finalColor = glm::mix(finalColor, reflectiveColor, material->getReflectiveFac());
     return glm::clamp(finalColor, 0.0, 1.0);
 }
 
@@ -106,13 +108,15 @@ void Renderer::render(const std::string &outputFile) {
             auto dirs = _getWorldspaceCoords(col, row, width, height);
 
             glm::dvec3 color = {0.0, 0.0, 0.0};
-            auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dirs[0] - from));
-            color += _traceRay(camRay.get(), 0);
-//            for (const glm::dvec3 &dir: dirs) {
-//                std::unique_ptr<Rays::Ray> camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
-//                color += _traceRay(camRay, 0);
-//            }
-            glm::dvec3 avg = color;
+//            auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dirs[0] - from));
+//            color += _traceRay(camRay.get(), 0);
+            for (const glm::dvec3 &dir: dirs) {
+                std::unique_ptr<Rays::Ray> camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
+//                std::cout <<"("<<camRay->getDirection().x<<","<<camRay->getDirection().y<<","<< camRay->getDirection().z<<") ";
+                color += _traceRay(camRay.get(), 0);
+            }
+//            std::cout << std::endl;
+            glm::dvec3 avg = color / 4.0;
             image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
         }
     }

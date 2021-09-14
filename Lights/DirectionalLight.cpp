@@ -13,7 +13,7 @@ DirectionalLight::calculateDiffuse(const Rays::Ray *ray, const Rays::Hit *hit, c
     auto adjOrigin = hit->getPoint() + _position * 0.0001;
     auto shadowRay = std::make_unique<Rays::IlluminationRay>(adjOrigin, _position);
     if (_inShadow(shadowRay.get(), objects)) {
-        return {0.0, 0.0, 255.0};
+        return {0.0, 0.0, 0.0};
     }
 
     auto nrm = hit->getNorm();

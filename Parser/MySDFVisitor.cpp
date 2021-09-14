@@ -40,8 +40,8 @@ antlrcpp::Any MySDFVisitor::visitCamera(antlrcpp::SDFParser::CameraContext *ctx)
 
 antlrcpp::Any MySDFVisitor::visitDirectionalLight(antlrcpp::SDFParser::DirectionalLightContext *ctx) {
     glm::dvec3 color = visitRgb(ctx->rgb());
-    glm::dvec3 pos = visitPoint3(ctx->point3());
-    std::unique_ptr<Light> light = std::make_unique<DirectionalLight>(pos, color);
+    glm::dvec3 dir = visitPoint3(ctx->point3());
+    std::unique_ptr<Light> light = std::make_unique<DirectionalLight>(glm::normalize(dir), color);
     _sceneDescription->pushLight(std::move(light));
     return light;
 }
@@ -64,10 +64,11 @@ antlrcpp::Any MySDFVisitor::visitMaterial(antlrcpp::SDFParser::MaterialContext *
     glm::dvec3 ksRgb = visitRgb(ctx->ks_rgb);
     double n = std::stod(ctx->n->getText());
     double kd = std::stod(ctx->kd->getText());
+    double kr = std::stod(ctx->kr->getText());
     double ks = std::stod(ctx->ks->getText());
     double kt = std::stod(ctx->kt->getText());
 
-    auto mat = std::make_unique<Material>(kd, ks, kt, n, kdRgb, ksRgb);
+    auto mat = std::make_unique<Material>(kd, kr, ks, kt, n, kdRgb, ksRgb);
     _sceneDescription->insertMaterial(num, std::move(mat));
     return mat;
 }

@@ -25,7 +25,7 @@ areaLight: 'AREA_LIGHT' 'p1' p1=point3 'p2' p2=point3 'color' rgb;
 pointLight: 'POINT_LIGHT' 'origin' point3 'color' rgb;
 sphereLight: 'SPHERE_LIGHT' 'origin' point3 'radius' radius=Float 'color' rgb;
 material: 'MATERIAL' 'mat_num' num=Int 'kd' kd_rgb=rgb 'ks' ks_rgb=rgb 'phong' n=Float
-'kd_fac' kd=Float 'ks_fac' ks=Float 'kt_fac' kt=Float;
+'kr_fac' kr=Float 'kd_fac' kd=Float 'ks_fac' ks=Float 'kt_fac' kt=Float;
 
 sphere: 'SPHERE' 'mat_num' mat_num=Int 'origin' point3 'radius' radius=Float;
 triangle: 'TRIANGLE' mat_num=Int vertex+;
