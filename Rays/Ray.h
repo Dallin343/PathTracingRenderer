@@ -38,6 +38,14 @@ namespace Rays {
     public:
         ReflectionRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
     };
+    class TransmissionRay: public Ray {
+    public:
+        TransmissionRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
+    };
+    class ShadowRay: public Ray {
+    public:
+        ShadowRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
+    };
 }
 
 #endif //CS655_RAY_H

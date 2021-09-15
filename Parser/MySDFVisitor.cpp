@@ -4,6 +4,8 @@
 
 #include <Lights/DirectionalLight.h>
 #include <Renderable/Sphere.h>
+#include <Lights/PointLight.h>
+#include <Renderable/Triangle.h>
 #include "MySDFVisitor.h"
 
 antlrcpp::Any MySDFVisitor::visitScene(antlrcpp::SDFParser::SceneContext *ctx) {
@@ -51,7 +53,11 @@ antlrcpp::Any MySDFVisitor::visitAreaLight(antlrcpp::SDFParser::AreaLightContext
 }
 
 antlrcpp::Any MySDFVisitor::visitPointLight(antlrcpp::SDFParser::PointLightContext *ctx) {
-    return SDFBaseVisitor::visitPointLight(ctx);
+    glm::dvec3 color = visitRgb(ctx->rgb());
+    glm::dvec3 origin = visitPoint3(ctx->point3());
+    std::unique_ptr<Light> light = std::make_unique<PointLight>(origin, color);
+    _sceneDescription->pushLight(std::move(light));
+    return light;
 }
 
 antlrcpp::Any MySDFVisitor::visitSphereLight(antlrcpp::SDFParser::SphereLightContext *ctx) {
@@ -85,7 +91,15 @@ antlrcpp::Any MySDFVisitor::visitSphere(antlrcpp::SDFParser::SphereContext *ctx)
 }
 
 antlrcpp::Any MySDFVisitor::visitTriangle(antlrcpp::SDFParser::TriangleContext *ctx) {
-    return SDFBaseVisitor::visitTriangle(ctx);
+    int mat_num = std::stoi(ctx->mat_num->getText());
+    std::pair<glm::dvec3, glm::dvec3> p1 = visitVertex(ctx->vertex(0));
+    std::pair<glm::dvec3, glm::dvec3> p2 = visitVertex(ctx->vertex(1));
+    std::pair<glm::dvec3, glm::dvec3> p3 = visitVertex(ctx->vertex(2));
+
+    auto& material = _sceneDescription->getMaterials().at(mat_num);
+    auto triangle = std::make_unique<Triangle>(material, p1.first, p2.first, p3.first);
+    _sceneDescription->pushObject(std::move(triangle));
+    return triangle;
 }
 
 antlrcpp::Any MySDFVisitor::visitPolygon(antlrcpp::SDFParser::PolygonContext *ctx) {
@@ -105,7 +119,9 @@ antlrcpp::Any MySDFVisitor::visitTexPolygon(antlrcpp::SDFParser::TexPolygonConte
 }
 
 antlrcpp::Any MySDFVisitor::visitVertex(antlrcpp::SDFParser::VertexContext *ctx) {
-    return SDFBaseVisitor::visitVertex(ctx);
+    glm::dvec3 point = visitPoint3(ctx->p);
+    glm::dvec3 nrm = visitPoint3(ctx->nrm);
+    return std::make_pair(point, nrm);
 }
 
 antlrcpp::Any MySDFVisitor::visitTex_vertex(antlrcpp::SDFParser::Tex_vertexContext *ctx) {

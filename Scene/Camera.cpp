@@ -33,5 +33,5 @@ void Camera::setFov(const glm::dvec2 &fov) {
 }
 
 glm::dvec2 Camera::getViewportSize() {
-    return (_fov * M_PI/180.0) * (_lookFrom - _lookAt).z;
+    return glm::radians(_fov) * (_lookFrom - _lookAt).z;
 }

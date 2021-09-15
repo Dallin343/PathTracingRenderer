@@ -2,6 +2,7 @@
 // Created by Dallin Hagman on 9/14/21.
 //
 
+#include <algorithm>
 #include "Polygon.h"
 
 Polygon::Polygon(const std::unique_ptr<Material> &material, std::vector<glm::dvec3> vertices) :

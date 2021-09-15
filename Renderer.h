@@ -14,6 +14,7 @@ class Renderer {
 private:
     glm::dvec3 _traceRay(Rays::Ray* ray, uint8_t depth);
     glm::dvec3 _traceRay(Rays::IlluminationRay* ray);
+    glm::dvec3 _refract(Rays::Ray* ray, const glm::dvec3& norm, const double &ior);
     std::array<glm::dvec3, 4> _getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height);
     std::unique_ptr<SceneDescription> _scene;
 public:

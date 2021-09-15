@@ -17,7 +17,6 @@ DirectionalLight::calculateDiffuse(const Rays::Ray *ray, const Rays::Hit *hit, c
     }
 
     auto nrm = hit->getNorm();
-//    glm::dvec3 reflection = glm::normalize(2.0 * nrm * glm::dot(nrm, _position) - _position);
 
     double angle = glm::max(glm::dot(nrm, _position), 0.0);
     return material->getDiffuseFac() * material->getDiffuseColor() * angle * _color;
@@ -40,13 +39,4 @@ DirectionalLight::calculateSpecular(const Rays::Ray *ray, const Rays::Hit *hit, 
     double angle = glm::max(glm::dot(ray->getDirection(), reflection), 0.0);
     return material->getSpecularColor() * material->getSpecularFac() * glm::pow(angle, 4) *
            _color;
-}
-
-bool DirectionalLight::_inShadow(const Rays::IlluminationRay *ray,
-                                 const std::vector<std::unique_ptr<BaseRenderable>> &objects) {
-    return std::any_of(objects.begin(), objects.end(), [&](auto &object) {
-        if (object->Intersect(ray).has_value()) {
-            return true;
-        }
-    });
 }

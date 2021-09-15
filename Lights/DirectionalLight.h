@@ -8,10 +8,6 @@
 #include "Light.h"
 
 class DirectionalLight : public Light {
-protected:
-    bool _inShadow(const Rays::IlluminationRay *,
-                   const std::vector<std::unique_ptr<BaseRenderable>> &) override;
-
 public:
     DirectionalLight(const glm::dvec3 &position, const glm::dvec3 &color);
 

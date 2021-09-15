@@ -28,7 +28,7 @@ material: 'MATERIAL' 'mat_num' num=Int 'kd' kd_rgb=rgb 'ks' ks_rgb=rgb 'phong' n
 'kr_fac' kr=Float 'kd_fac' kd=Float 'ks_fac' ks=Float 'kt_fac' kt=Float;
 
 sphere: 'SPHERE' 'mat_num' mat_num=Int 'origin' point3 'radius' radius=Float;
-triangle: 'TRIANGLE' mat_num=Int vertex+;
+triangle: 'TRIANGLE' 'mat_num' mat_num=Int 'points' vertex+;
 polygon: 'POLYGON' mat_num=Int num_verts=Int vertex+;
 texSphere: 'TEX_SPHERE' tex_num=Int point3 radius=Float;
 texTriangle: 'TEX_TRIANGLE' tex_num=Int tex_vertex+;

@@ -20,7 +20,7 @@ protected:
     glm::dvec3 _color;
 
     virtual bool
-    _inShadow(const Rays::IlluminationRay *, const std::vector<std::unique_ptr<BaseRenderable>> &) = 0;
+    _inShadow(const Rays::IlluminationRay *, const std::vector<std::unique_ptr<BaseRenderable>> &);
 
 public:
     Light(const glm::dvec3 &position, const glm::dvec3 &color);

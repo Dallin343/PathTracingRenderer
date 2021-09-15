@@ -62,6 +62,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth = 0) {
     const Material* material = object->GetMaterial();
     glm::dvec3 finalColor = {0.0, 0.0, 0.0};
     glm::dvec3 reflectiveColor = {0.0, 0.0, 0.0};
+    glm::dvec3 transmissionColor = {0.0, 0.0, 0.0};
 
     // Reflection Rays
     auto currentDir = ray->getDirection();
@@ -72,6 +73,19 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth = 0) {
         glm::dvec3 reflectionDir = glm::normalize(currentDir - nrm * 2.0 * glm::dot(currentDir, nrm));
         auto reflectionRay = std::make_unique<Rays::CameraRay>(hit->getPoint() + nrm * e, reflectionDir);
         reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
+    }
+
+    if (material->getTransmissionFac() > 0.0 && depth < MAX_DEPTH) {
+//        double n_it = 1.0 / material->getTransmissionFac();
+//        double angle = glm::acos(glm::dot(glm::normalize(ray->getDirection()), glm::normalize(nrm)));
+//        glm::dvec3 transmissionDir = n_it * ray->getDirection()
+//                + (n_it*glm::cos(angle)-glm::sqrt(1+n_it*n_it*(glm::cos(angle)*glm::cos(angle)-1)))*glm::normalize(nrm);
+//
+//        auto transRay = std::make_unique<Rays::CameraRay>(hit->getPoint(), transmissionDir);
+//        transmissionColor += _traceRay(transRay.get(), depth + 1);
+        glm::dvec3 refractDir = _refract(ray, nrm, material->getTransmissionFac());
+        auto transRay = std::make_unique<Rays::CameraRay>(hit->getPoint(), refractDir);
+        transmissionColor += _traceRay(transRay.get(), depth + 1);
     }
 
     auto &lights = _scene->getLights();
@@ -87,6 +101,10 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth = 0) {
     finalColor += _scene->getAmbientColor() * material->getDiffuseColor() * _scene->getAmbientFac();
 
     finalColor = glm::mix(finalColor, reflectiveColor, material->getReflectiveFac());
+    glm::bvec3 truvec = {true, true, true};
+    if (glm::equal(transmissionColor, {0.0, 0.0, 0.0}) != truvec) {
+        finalColor = glm::mix(finalColor, transmissionColor, material->getTransmissionFac());
+    }
     return glm::clamp(finalColor, 0.0, 1.0);
 }
 
@@ -108,14 +126,11 @@ void Renderer::render(const std::string &outputFile) {
             auto dirs = _getWorldspaceCoords(col, row, width, height);
 
             glm::dvec3 color = {0.0, 0.0, 0.0};
-//            auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dirs[0] - from));
-//            color += _traceRay(camRay.get(), 0);
+
             for (const glm::dvec3 &dir: dirs) {
                 std::unique_ptr<Rays::Ray> camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
-//                std::cout <<"("<<camRay->getDirection().x<<","<<camRay->getDirection().y<<","<< camRay->getDirection().z<<") ";
                 color += _traceRay(camRay.get(), 0);
             }
-//            std::cout << std::endl;
             glm::dvec3 avg = color / 4.0;
             image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
         }
@@ -136,6 +151,16 @@ void Renderer::render(const std::string &outputFile) {
 
 Renderer::Renderer(std::unique_ptr<SceneDescription> scene) {
     this->_scene = std::move(scene);
+}
+
+glm::dvec3 Renderer::_refract(Rays::Ray *ray, const glm::dvec3 &norm, const double &ior) {
+    double cosi = glm::clamp(glm::dot(ray->getDirection(), norm), -1.0, 1.0);
+    double etai = 1, etat = ior;
+    glm::dvec3 n = norm;
+    if (cosi < 0) { cosi = -cosi; } else { std::swap(etai, etat); n= -norm; }
+    double eta = etai / etat;
+    double k = 1 - eta * eta * (1 - cosi * cosi);
+    return k < 0.0 ? glm::dvec3(0.0, 0.0, 0.0) : eta * ray->getDirection() + (eta * cosi - glm::sqrt(k)) * n;
 }
 
 Renderer::Renderer() = default;

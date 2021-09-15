@@ -21,3 +21,13 @@ const glm::dvec3 &Light::getColor() const {
 void Light::setColor(const glm::dvec3 &color) {
     _color = color;
 }
+
+bool Light::_inShadow(const Rays::IlluminationRay *ray, const std::vector<std::unique_ptr<BaseRenderable>> &objects) {
+    for (const auto& object : objects) {
+        auto hit = object->Intersect(ray);
+        if (hit.has_value()) {
+            return true;
+        }
+    }
+    return false;
+}
