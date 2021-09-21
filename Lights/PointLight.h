@@ -9,6 +9,8 @@
 #include "Light.h"
 
 class PointLight: public Light {
+protected:
+    virtual double _intensity(const Rays::Ray *);
 public:
     PointLight(const glm::dvec3 &position, const glm::dvec3 &color);
 
@@ -18,6 +20,9 @@ public:
     glm::dvec3 calculateSpecular(const Rays::Ray *ray, const Rays::Hit *hit, const Material *material,
                                  const std::vector<std::unique_ptr<BaseRenderable>> &vector,
                                  const Camera *camera) override;
+
+    bool inShadow(const Rays::Ray *ray, const Rays::Hit *hit,
+                  const std::vector<std::unique_ptr<BaseRenderable>> &vector) override;
 };
 
 

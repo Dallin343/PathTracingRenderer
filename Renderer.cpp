@@ -5,7 +5,15 @@
 #include <array>
 #include <algorithm>
 #include <fstream>
+#include <sstream>
+#include <glm/gtx/vector_angle.hpp>
 #include "Renderer.h"
+
+std::string printVec(const glm::dvec3 &vec) {
+    std::stringstream stream;
+    stream << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+    return stream.str();
+}
 
 void Renderer::render(std::unique_ptr<SceneDescription> scene, const std::string &outputFile) {
     _scene = std::move(scene);
@@ -23,8 +31,6 @@ std::array<glm::dvec3, 4> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j,
     double v = j * jStep + (jStep / 2.0) - viewport.y;
 
     auto subPixels = std::array<glm::dvec3, 4>();
-//    subPixels[0] = {u, v, 0.0};
-//    return subPixels;
     subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
     subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
     subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
@@ -32,89 +38,54 @@ std::array<glm::dvec3, 4> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j,
     return subPixels;
 }
 
-glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth = 0) {
-    std::vector<std::pair<const std::unique_ptr<BaseRenderable> &, std::unique_ptr<Rays::Hit>>> hits;
-    for (const auto &object: _scene->getObjects()) {
-        std::optional<std::unique_ptr<Rays::Hit>> hit = object->Intersect(ray);
-        if (hit.has_value()) {
-            hits.emplace_back(object, std::move(hit.value()));
-        }
-    }
+glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
+    auto closestHit = _findHit(ray);
 
-    if (hits.empty()) {
+    if (!closestHit.has_value()) {
         return _scene->getBackground();
+    } else if (depth > MAX_DEPTH) {
+        return {};
     }
 
-    double min = -1.0;
-    int closest;
-    for (int i = 0; i < hits.size(); i++) {
-        auto &pair = hits.at(i);
-        auto distance = pair.second->distanceTo(ray->getOrigin());
-        if (distance < min || min == -1) {
-            min = distance;
-            closest = i;
-        }
-    }
-    auto &found = hits.at(closest);
-    auto &object = found.first;
-    auto hit = std::move(found.second);
+    auto hit = std::move(closestHit.value());
+    auto object = hit->getObject();
 
-    const Material* material = object->GetMaterial();
-    glm::dvec3 finalColor = {0.0, 0.0, 0.0};
+    const Material *material = object->getMaterial();
+    glm::dvec3 color = {0.0, 0.0, 0.0};
     glm::dvec3 reflectiveColor = {0.0, 0.0, 0.0};
     glm::dvec3 transmissionColor = {0.0, 0.0, 0.0};
 
-    // Reflection Rays
-    auto currentDir = ray->getDirection();
-    auto nrm = hit->getNorm();
-    double e = 0.0001;
-
-    if (material->getReflectiveFac() > 0.0 && depth < MAX_DEPTH) {
-        glm::dvec3 reflectionDir = glm::normalize(currentDir - nrm * 2.0 * glm::dot(currentDir, nrm));
-        auto reflectionRay = std::make_unique<Rays::CameraRay>(hit->getPoint() + nrm * e, reflectionDir);
-        reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
+    switch (material->getType()) {
+        case Diffuse:
+            color = _calculateIllumination(ray, hit.get());
+            if (material->getReflectiveFac() > 0.0) {
+                auto reflectionRay = _reflect(ray, hit.get());
+                reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
+            }
+            color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
+            color += _scene->getAmbientColor() * _scene->getAmbientFac() * material->getDiffuseColor();
+            break;
+        case Transparent:
+            if (material->getReflectiveFac() > 0.0) {
+                auto reflectionRay = _reflect(ray, hit.get());
+                reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
+            }
+            if (material->getTransmissionFac() > 0.0) {
+                auto transmissionRay = _refract(ray, hit.get());
+                transmissionColor += _traceRay(transmissionRay.get(), depth + 1);
+            }
+            double kr = _fresnel(ray, hit.get());
+            color = reflectiveColor * kr + transmissionColor * (1 - kr);
+            color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
+            break;
     }
 
-    if (material->getTransmissionFac() > 0.0 && depth < MAX_DEPTH) {
-//        double n_it = 1.0 / material->getTransmissionFac();
-//        double angle = glm::acos(glm::dot(glm::normalize(ray->getDirection()), glm::normalize(nrm)));
-//        glm::dvec3 transmissionDir = n_it * ray->getDirection()
-//                + (n_it*glm::cos(angle)-glm::sqrt(1+n_it*n_it*(glm::cos(angle)*glm::cos(angle)-1)))*glm::normalize(nrm);
-//
-//        auto transRay = std::make_unique<Rays::CameraRay>(hit->getPoint(), transmissionDir);
-//        transmissionColor += _traceRay(transRay.get(), depth + 1);
-        glm::dvec3 refractDir = _refract(ray, nrm, material->getTransmissionFac());
-        auto transRay = std::make_unique<Rays::CameraRay>(hit->getPoint(), refractDir);
-        transmissionColor += _traceRay(transRay.get(), depth + 1);
-    }
-
-    auto &lights = _scene->getLights();
-
-    std::for_each(lights.begin(), lights.end(), [&](const std::unique_ptr<Light> &light) {
-        glm::dvec3 diffuse = light->calculateDiffuse(ray, hit.get(), material, _scene->getObjects());
-        glm::dvec3 specular = light->calculateSpecular(ray, hit.get(), material, _scene->getObjects(), _scene->getCamera());
-
-        // TEMPORARY
-        finalColor += diffuse + specular;
-    });
-
-    finalColor += _scene->getAmbientColor() * material->getDiffuseColor() * _scene->getAmbientFac();
-
-    finalColor = glm::mix(finalColor, reflectiveColor, material->getReflectiveFac());
-    glm::bvec3 truvec = {true, true, true};
-    if (glm::equal(transmissionColor, {0.0, 0.0, 0.0}) != truvec) {
-        finalColor = glm::mix(finalColor, transmissionColor, material->getTransmissionFac());
-    }
-    return glm::clamp(finalColor, 0.0, 1.0);
-}
-
-glm::dvec3 Renderer::_traceRay(Rays::IlluminationRay *ray) {
-    return glm::dvec3();
+    return glm::clamp(color, 0.0, 1.0);
 }
 
 void Renderer::render(const std::string &outputFile) {
-    const int width = 480;
-    const int height = 480;
+    const int width = 1000;
+    const int height = 1000;
     auto image = std::vector<std::vector<glm::ivec3>>();
     image.resize(height);
 
@@ -128,7 +99,7 @@ void Renderer::render(const std::string &outputFile) {
             glm::dvec3 color = {0.0, 0.0, 0.0};
 
             for (const glm::dvec3 &dir: dirs) {
-                std::unique_ptr<Rays::Ray> camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
+                auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
                 color += _traceRay(camRay.get(), 0);
             }
             glm::dvec3 avg = color / 4.0;
@@ -153,14 +124,95 @@ Renderer::Renderer(std::unique_ptr<SceneDescription> scene) {
     this->_scene = std::move(scene);
 }
 
-glm::dvec3 Renderer::_refract(Rays::Ray *ray, const glm::dvec3 &norm, const double &ior) {
-    double cosi = glm::clamp(glm::dot(ray->getDirection(), norm), -1.0, 1.0);
-    double etai = 1, etat = ior;
-    glm::dvec3 n = norm;
-    if (cosi < 0) { cosi = -cosi; } else { std::swap(etai, etat); n= -norm; }
-    double eta = etai / etat;
+glm::dvec3 Renderer::_calculateIllumination(Rays::Ray *ray, Rays::Hit *hit) {
+    BaseRenderable *object = hit->getObject();
+    auto material = object->getMaterial();
+    glm::dvec3 color = {0.0, 0.0, 0.0};
+    auto &lights = _scene->getLights();
+
+    for (const auto& light : lights) {
+        if (!light->inShadow(ray, hit, _scene->getObjects())) {
+            glm::dvec3 diffuse = light->calculateDiffuse(ray, hit, material, _scene->getObjects());
+            glm::dvec3 specular = light->calculateSpecular(ray, hit, material, _scene->getObjects(),
+                                                           _scene->getCamera());
+
+            // TEMPORARY
+            color += diffuse + specular;
+        }
+    }
+
+    return color;
+}
+
+std::optional<std::unique_ptr<Rays::Hit>> Renderer::_findHit(Rays::Ray *ray) {
+    std::optional<std::unique_ptr<Rays::Hit>> closestHit = std::nullopt;
+    for (const auto &object: _scene->getObjects()) {
+        std::optional<std::unique_ptr<Rays::Hit>> hit = object->intersect(ray);
+        if (!hit.has_value()) {
+            continue;
+        }
+
+        if (!closestHit.has_value()) {
+            closestHit = std::move(hit);
+        } else if (hit.value()->distanceTo(ray->getOrigin()) < closestHit.value()->distanceTo(ray->getOrigin())) {
+            closestHit = std::move(hit);
+        }
+    }
+    return closestHit;
+}
+
+std::unique_ptr<Rays::ReflectionRay> Renderer::_reflect(Rays::Ray *ray, Rays::Hit *hit) {
+    double e = 0.00001;
+    auto currentDir = ray->getDirection();
+    auto norm = hit->getNorm();
+    glm::dvec3 reflectionDir = glm::normalize(currentDir - norm * 2.0 * glm::dot(currentDir, norm));
+
+    glm::dvec3 bias = glm::dot(currentDir, norm) < 0.0 ? norm * e : norm * -e;
+    return std::make_unique<Rays::ReflectionRay>(hit->getPoint() + bias, reflectionDir);
+}
+
+std::unique_ptr<Rays::TransmissionRay> Renderer::_refract(Rays::Ray *ray, Rays::Hit *hit) {
+    double e = 1e-8;
+    glm::dvec3 I = ray->getDirection();
+    glm::dvec3 N = hit->getNorm();
+    double ior = hit->getObject()->getMaterial()->getIor();
+
+    double cosi = glm::clamp(glm::dot(I, N), -1.0, 1.0);
+    double n1 = 1.0, n2 = ior;
+    glm::dvec3 n = N;
+    if (cosi < 0) { cosi = -cosi; } else { std::swap(n1, n2); n= -N; }
+    double eta = n1 / n2;
     double k = 1 - eta * eta * (1 - cosi * cosi);
-    return k < 0.0 ? glm::dvec3(0.0, 0.0, 0.0) : eta * ray->getDirection() + (eta * cosi - glm::sqrt(k)) * n;
+    glm::dvec3 refractDir = k < 0.0 ? glm::dvec3() : eta * I + (eta * cosi - glm::sqrt(k)) * n;
+    refractDir = glm::normalize(refractDir);
+
+    bool outside = glm::dot(I, N) < 0;
+    glm::dvec3 bias = e * N;
+    glm::dvec3 origin = outside ? hit->getPoint() - bias : hit->getPoint() + bias;
+    return std::make_unique<Rays::TransmissionRay>(origin, refractDir);
+}
+
+double Renderer::_fresnel(Rays::Ray *ray, Rays::Hit *hit) {
+    glm::dvec3 I = ray->getDirection();
+    glm::dvec3 N = hit->getNorm();
+    double ior = hit->getObject()->getMaterial()->getIor();
+
+    double cosi = glm::clamp(glm::dot(I, N), -1.0, 1.0);
+    double etai = 1, etat = ior;
+    if (cosi > 0) { std::swap(etai, etat); }
+    // Compute sini using Snell's law
+    double sint = etai / etat * glm::sqrt(glm::max(0.0, 1 - cosi * cosi));
+    // Total internal reflection
+    if (sint >= 1) {
+        return 1;
+    }
+    else {
+        double cost = glm::sqrt(glm::max(0.0, 1 - sint * sint));
+        cosi = glm::abs(cosi);
+        double Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+        double Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+        return (Rs * Rs + Rp * Rp) / 2.0;
+    }
 }
 
 Renderer::Renderer() = default;

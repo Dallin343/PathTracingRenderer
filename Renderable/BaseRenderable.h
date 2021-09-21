@@ -5,7 +5,7 @@
 #ifndef CS655_BASERENDERABLE_H
 #define CS655_BASERENDERABLE_H
 
-#include "Material.h"
+#include "Material/Material.h"
 #include "Rays/Ray.h"
 #include "Rays/Hit.h"
 #include <iostream>
@@ -18,8 +18,8 @@ protected:
 public:
     explicit BaseRenderable(const std::unique_ptr<Material>& material) : _material(material) {}
 
-    virtual std::optional<std::unique_ptr<Rays::Hit>> Intersect(const Rays::Ray* ray) = 0;
-    virtual const Material* GetMaterial() = 0;
+    virtual std::optional<std::unique_ptr<Rays::Hit>> intersect(const Rays::Ray* ray) = 0;
+    virtual const Material* getMaterial() = 0;
 };
 
 

@@ -3,8 +3,10 @@
 //
 
 #include "Ray.h"
+
 namespace Rays {
-    Ray::Ray(const glm::dvec3 &origin, const glm::dvec3 &direction) : _origin(origin), _direction(direction) {}
+    Ray::Ray(const glm::dvec3 &origin, const glm::dvec3 &direction) : _origin(origin),
+                                                                      _direction(glm::normalize(direction)) {}
 
     const glm::dvec3 &Ray::getOrigin() const {
         return _origin;

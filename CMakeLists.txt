@@ -27,7 +27,7 @@ add_subdirectory(Vendor/glm)
 add_executable(CS655
         ${ANTLR_SDFParser_CXX_OUTPUTS}
         main.cpp
-        Renderable/Material.cpp
+        Material/Material.cpp
         Rays/Ray.cpp
         Renderable/Sphere.cpp
         Rays/Hit.cpp

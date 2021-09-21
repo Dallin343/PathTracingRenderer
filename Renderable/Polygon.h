@@ -19,10 +19,10 @@ public:
     Polygon(const std::unique_ptr<Material>& material, std::vector<glm::dvec3> vertices);
 
 private:
-    std::optional<std::unique_ptr<Rays::Hit>> PlaneIntersect(const Rays::Ray* ray);
-    std::optional<std::unique_ptr<Rays::Hit>> Intersect(const Rays::Ray* ray) override;
+    std::optional<std::unique_ptr<Rays::Hit>> planeIntersect(const Rays::Ray* ray);
+    std::optional<std::unique_ptr<Rays::Hit>> intersect(const Rays::Ray* ray) override;
 
-    const Material* GetMaterial() override;
+    const Material* getMaterial() override;
 };
 
 

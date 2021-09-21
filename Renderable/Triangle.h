@@ -18,9 +18,9 @@ public:
 
 private:
     glm::dvec3 calcNormal();
-    std::optional<std::unique_ptr<Rays::Hit>> Intersect(const Rays::Ray* ray) override;
+    std::optional<std::unique_ptr<Rays::Hit>> intersect(const Rays::Ray* ray) override;
 
-    const Material* GetMaterial() override;
+    const Material* getMaterial() override;
 };
 
 

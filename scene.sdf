@@ -1,10 +1,77 @@
-BACKGROUND color 0.5 0.5 0.5
-AMBIENT fac 0.2 color 0.5 0.5 0.5
-DIRECTIONAL_LIGHT direction 4.0 4.0 0.0 color 1.0 1.0 1.0
-MATERIAL mat_num 1 kd 0.8 0.0 0.0 ks 1.0 1.0 1.0 phong 10.0 kr_fac 0.2 kd_fac 0.8 ks_fac 0.8 kt_fac 0.0
-MATERIAL mat_num 2 kd 0.0 0.8 0.0 ks 1.0 1.0 1.0 phong 10.0 kr_fac 0.2 kd_fac 0.8 ks_fac 0.8 kt_fac 1.4
-TRIANGLE mat_num 1 points -2.0 0.0 2.0 0.0 0.0 -1.0   3.0 0.0 0.0 0.0 0.0 -1.0   0.0 4.0 -4.0 0.0 0.0 -1.0
-SPHERE mat_num 2 origin 0.0 -3.0 0.0 radius 2.0
-SPHERE mat_num 1 origin 2.0 2.0 1.0 radius 0.5
-SPHERE mat_num 1 origin -3.0 2.0 1.0 radius 0.5
-CAMERA look_from 0.0 0.0 5.0 look_at 0.0 0.0 0.0 fov 45.0 45.0
+BACKGROUND Color 0.2 0.2 0.2
+AMBIENT AmbientFactor 0.1 Color 0.5 0.5 0.5
+DIRECTIONAL_LIGHT Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0
+POINT_LIGHT Origin -4.0 -4.0 2.0 Color 1.0 1.0 1.0
+POINT_LIGHT Origin -4.0 0.0 0.0 Color 0.8 0.6 0.2
+MATERIAL
+    Index 1
+    Type Diffuse
+    DiffuseColor 0.4 0.45 0.5
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 2.0
+    DiffuseFactor 1.0
+    SpecularFactor 0.0
+    ReflectiveFactor 0.5
+
+MATERIAL
+    Index 2
+    Type Transparent
+    ReflectiveFactor 0.1
+    TransmissionFactor 0.6
+    IndexOfRefraction 1.08
+MATERIAL
+    Index 3
+    Type Diffuse
+    DiffuseColor 0.5 0.2 1.0
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 128.0
+    DiffuseFactor 0.6
+    SpecularFactor 0.4
+    ReflectiveFactor 0.5
+MATERIAL
+    Index 4
+    Type Diffuse
+    DiffuseColor 0.0 0.0 1.0
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 4.0
+    DiffuseFactor 0.8
+    SpecularFactor 0.4
+    ReflectiveFactor 0.1
+
+MATERIAL
+    Index 5
+    Type Diffuse
+    DiffuseColor 0.0 1.0 0.0
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 4.0
+    DiffuseFactor 1.0
+    SpecularFactor 0.2
+    ReflectiveFactor 0.0
+
+MATERIAL
+    Index 6
+    Type Diffuse
+    DiffuseColor 1.0 0.0 0.0
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 32.0
+    DiffuseFactor 0.6
+    SpecularFactor 0.2
+    ReflectiveFactor 0.1
+
+TRIANGLE
+    MaterialNumber 4
+    Point1 2.0 -6.0 -4.0
+    Point2 0.0 0.0 -8.0
+    Point3 -2.0 -6.0 -4.0
+
+#Floor
+TRIANGLE
+    MaterialNumber 1
+    Point1 3.0 100.0 5.0
+    Point2 -1.0 0.0 -50.0
+    Point3 3.0 -100.0 5.0
+SPHERE MaterialNumber 2 Origin 0.0 -0.4 1.0 Radius 1.6
+SPHERE MaterialNumber 3 Origin 1.3 1.3 3.0 Radius 0.5
+SPHERE MaterialNumber 5 Origin 1.0 2.0 -2.0 Radius 1.5
+
+CAMERA LookFrom 0.0 0.0 5.0 LookAt 0.0 0.0 0.0 FieldOfView 90.0 90.0

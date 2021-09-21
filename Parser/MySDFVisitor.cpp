@@ -65,18 +65,26 @@ antlrcpp::Any MySDFVisitor::visitSphereLight(antlrcpp::SDFParser::SphereLightCon
 }
 
 antlrcpp::Any MySDFVisitor::visitMaterial(antlrcpp::SDFParser::MaterialContext *ctx) {
+    std::string type = ctx->type->getText();
     int num = std::stoi(ctx->num->getText());
-    glm::dvec3 kdRgb = visitRgb(ctx->kd_rgb);
-    glm::dvec3 ksRgb = visitRgb(ctx->ks_rgb);
-    double n = std::stod(ctx->n->getText());
-    double kd = std::stod(ctx->kd->getText());
-    double kr = std::stod(ctx->kr->getText());
-    double ks = std::stod(ctx->ks->getText());
-    double kt = std::stod(ctx->kt->getText());
+    if (type == "Diffuse") {
+        glm::dvec3 kdRgb = visitRgb(ctx->kd_rgb);
+        glm::dvec3 ksRgb = visitRgb(ctx->ks_rgb);
+        double n = std::stod(ctx->n->getText());
+        double kd = std::stod(ctx->kd->getText());
+        double ks = std::stod(ctx->ks->getText());
+        double kr = std::stod(ctx->kr->getText());
+        auto mat = std::make_unique<Material>(kd, ks, kr, n, kdRgb, ksRgb);
+        _sceneDescription->insertMaterial(num, std::move(mat));
+    } else if (type == "Transparent") {
+        double kr = std::stod(ctx->kr->getText());
+        double kt = std::stod(ctx->kt->getText());
+        double ior = std::stod(ctx->ior->getText());
+        auto mat = std::make_unique<Material>(kr, kt, ior);
+        _sceneDescription->insertMaterial(num, std::move(mat));
+    }
 
-    auto mat = std::make_unique<Material>(kd, kr, ks, kt, n, kdRgb, ksRgb);
-    _sceneDescription->insertMaterial(num, std::move(mat));
-    return mat;
+    return num;
 }
 
 antlrcpp::Any MySDFVisitor::visitSphere(antlrcpp::SDFParser::SphereContext *ctx) {
@@ -92,12 +100,12 @@ antlrcpp::Any MySDFVisitor::visitSphere(antlrcpp::SDFParser::SphereContext *ctx)
 
 antlrcpp::Any MySDFVisitor::visitTriangle(antlrcpp::SDFParser::TriangleContext *ctx) {
     int mat_num = std::stoi(ctx->mat_num->getText());
-    std::pair<glm::dvec3, glm::dvec3> p1 = visitVertex(ctx->vertex(0));
-    std::pair<glm::dvec3, glm::dvec3> p2 = visitVertex(ctx->vertex(1));
-    std::pair<glm::dvec3, glm::dvec3> p3 = visitVertex(ctx->vertex(2));
+    glm::dvec3 p1 = visitPoint3(ctx->p1);
+    glm::dvec3 p2 = visitPoint3(ctx->p2);
+    glm::dvec3 p3 = visitPoint3(ctx->p3);
 
     auto& material = _sceneDescription->getMaterials().at(mat_num);
-    auto triangle = std::make_unique<Triangle>(material, p1.first, p2.first, p3.first);
+    auto triangle = std::make_unique<Triangle>(material, p1, p2, p3);
     _sceneDescription->pushObject(std::move(triangle));
     return triangle;
 }

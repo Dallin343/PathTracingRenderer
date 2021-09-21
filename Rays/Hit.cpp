@@ -4,7 +4,10 @@
 
 #include "Hit.h"
 
-Rays::Hit::Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm) : _t(t), _point(point), _norm(norm) {}
+Rays::Hit::Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm, BaseRenderable *object) : _t(t),
+                                                                                                    _point(point),
+                                                                                                    _norm(norm),
+                                                                                                    _object(object) {}
 
 double Rays::Hit::getT() const {
     return _t;
@@ -34,6 +37,10 @@ double Rays::Hit::distanceTo(const glm::dvec3 &other) {
     return glm::distance(_point, other);
 }
 
-glm::dvec3 Rays::Hit::vectorTo(const glm::dvec3 & other) {
+glm::dvec3 Rays::Hit::vectorTo(const glm::dvec3 &other) {
     return glm::normalize(other - _point);
+}
+
+BaseRenderable *Rays::Hit::getObject() const {
+    return _object;
 }

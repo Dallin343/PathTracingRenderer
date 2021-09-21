@@ -10,7 +10,7 @@
 #include <vector>
 #include "Renderable/BaseRenderable.h"
 #include "Rays/Ray.h"
-#include "Renderable/Material.h"
+#include "Material/Material.h"
 #include "Scene/Camera.h"
 #include "Rays/Hit.h"
 
@@ -19,8 +19,7 @@ protected:
     glm::dvec3 _position;
     glm::dvec3 _color;
 
-    virtual bool
-    _inShadow(const Rays::IlluminationRay *, const std::vector<std::unique_ptr<BaseRenderable>> &);
+    virtual double _intensity(const Rays::Ray *) = 0;
 
 public:
     Light(const glm::dvec3 &position, const glm::dvec3 &color);
@@ -39,6 +38,9 @@ public:
     const glm::dvec3 &getColor() const;
 
     void setColor(const glm::dvec3 &color);
+
+    virtual bool
+    inShadow(const Rays::Ray *, const Rays::Hit *, const std::vector<std::unique_ptr<BaseRenderable>> &);
 };
 
 

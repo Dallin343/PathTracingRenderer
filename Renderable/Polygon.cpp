@@ -29,9 +29,9 @@ Polygon::Polygon(const std::unique_ptr<Material> &material, std::vector<glm::dve
     std::transform(_vertices.begin(), _vertices.end(), std::back_inserter(_projVertices), transform);
 }
 
-std::optional<std::unique_ptr<Rays::Hit>> Polygon::Intersect(const Rays::Ray *ray) {
+std::optional<std::unique_ptr<Rays::Hit>> Polygon::intersect(const Rays::Ray *ray) {
     //Refactor into Plane -> Polygon
-    auto hit = PlaneIntersect(ray);
+    auto hit = planeIntersect(ray);
     if (!hit.has_value()) {
         return std::nullopt;
     }
@@ -50,11 +50,11 @@ std::optional<std::unique_ptr<Rays::Hit>> Polygon::Intersect(const Rays::Ray *ra
     return std::nullopt;
 }
 
-const Material *Polygon::GetMaterial() {
+const Material *Polygon::getMaterial() {
     return _material.get();
 }
 
-std::optional<std::unique_ptr<Rays::Hit>> Polygon::PlaneIntersect(const Rays::Ray *ray) {
+std::optional<std::unique_ptr<Rays::Hit>> Polygon::planeIntersect(const Rays::Ray *ray) {
     const glm::dvec3 dir = ray->getDirection();
     const glm::dvec3 origin = ray->getOrigin();
     double vd = glm::dot(_normal, ray->getDirection());
@@ -74,6 +74,6 @@ std::optional<std::unique_ptr<Rays::Hit>> Polygon::PlaneIntersect(const Rays::Ra
     }
 
     glm::dvec3 point = {origin.x + dir.x * t, origin.y + dir.y * t, origin.z + dir.z * t};
-    auto hit = std::make_unique<Rays::Hit>(t, point, _normal);
+    auto hit = std::make_unique<Rays::Hit>(t, point, _normal, this);
     return hit;
 }

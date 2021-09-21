@@ -6,6 +6,7 @@
 #define CS655_HIT_H
 
 #include "Renderable/Common.h"
+class BaseRenderable;
 
 namespace Rays {
     class Hit {
@@ -13,8 +14,9 @@ namespace Rays {
         double _t;
         glm::dvec3 _point;
         glm::dvec3 _norm;
+        BaseRenderable* _object;
     public:
-        Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm);
+        Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm, BaseRenderable* object);
 
         double getT() const;
 
@@ -30,6 +32,8 @@ namespace Rays {
 
         double distanceTo(const glm::dvec3& other);
         glm::dvec3 vectorTo(const glm::dvec3& other);
+
+        BaseRenderable *getObject() const;
     };
 }
 

@@ -9,7 +9,7 @@ Triangle::Triangle(const std::unique_ptr<Material> &material, glm::dvec3 p1, glm
 
 }
 
-std::optional<std::unique_ptr<Rays::Hit>> Triangle::Intersect(const Rays::Ray *ray) {
+std::optional<std::unique_ptr<Rays::Hit>> Triangle::intersect(const Rays::Ray *ray) {
     double e = 0.000001;
     glm::dvec3 w0 = ray->getOrigin() - _p2;
     double num = -(glm::dot(calcNormal(), w0));
@@ -46,13 +46,13 @@ std::optional<std::unique_ptr<Rays::Hit>> Triangle::Intersect(const Rays::Ray *r
         }
 
         auto norm = calcNormal();
-        auto hit = std::make_unique<Rays::Hit>(t, point, norm);
+        auto hit = std::make_unique<Rays::Hit>(t, point, norm, this);
         return hit;
     }
     return std::nullopt;
 }
 
-const Material *Triangle::GetMaterial() {
+const Material *Triangle::getMaterial() {
     return _material.get();
 }
 

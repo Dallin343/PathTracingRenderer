@@ -5,36 +5,50 @@
 #include "Sphere.h"
 #include <glm.hpp>
 
-std::optional<std::unique_ptr<Rays::Hit>> Sphere::Intersect(const Rays::Ray* ray) {
+std::optional<std::unique_ptr<Rays::Hit>> Sphere::intersect(const Rays::Ray* ray) {
     glm::dvec3 oc = _origin - ray->getOrigin();
-    double adj = glm::dot(oc, ray->getDirection());
+    double tca = glm::dot(oc, ray->getDirection());
 
-    if (adj < 0.0) {
+    bool outside = glm::length(oc) > _radius;
+
+    if (tca < 0.0 && outside) {
         return std::nullopt;
     }
 
-    double d2 = glm::dot(oc, oc) - (adj * adj);
+    double d2 = glm::dot(oc, oc) - (tca * tca);
 
     if (d2 > _radius * _radius) {
         return std::nullopt;
     }
 
-    double thc = glm::sqrt(_radius * _radius - d2);
-    double t0 = adj - thc;
-    double t1 = adj + thc;
+    double thc2 = _radius * _radius - d2;
+    if (thc2 < 0.0) {
+        return std::nullopt;
+    }
+
+    double thc = glm::sqrt(thc2);
+    double t0 = tca - thc;
+    double t1 = tca + thc;
 
     if (t0 <= 0.0 && t1 <= 0.0) {
         return std::nullopt;
     }
 
-    double t = t0 < t1 ? t0 : t1;
+    double t;
+    if (t0 < 0.0) {
+        t = t1;
+    } else if (t1 < 0.0) {
+        t = t0;
+    } else {
+        t = t0 < t1 ? t0 : t1;
+    }
 
     glm::dvec3 point = ray->getOrigin() + (ray->getDirection() * t);
     glm::dvec3 norm = glm::normalize((point - _origin));
-    return std::make_unique<Rays::Hit>(t, point, norm);
+    return std::make_unique<Rays::Hit>(t, point, norm, this);
 }
 
-const Material* Sphere::GetMaterial() {
+const Material* Sphere::getMaterial() {
     return _material.get();
 }
 
