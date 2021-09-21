@@ -48,9 +48,8 @@ std::optional<std::unique_ptr<Rays::Hit>> Sphere::intersect(const Rays::Ray* ray
     return std::make_unique<Rays::Hit>(t, point, norm, this);
 }
 
-const Material* Sphere::getMaterial() {
-    return _material.get();
-}
-
 Sphere::Sphere(const std::unique_ptr<Material> &material, glm::dvec3 origin, double radius) : BaseRenderable(
-        material), _origin(origin),_radius(radius) {}
+        material), _origin(origin),_radius(radius) {
+    _bounds.min = _origin - _radius;
+    _bounds.max = _origin + _radius;
+}

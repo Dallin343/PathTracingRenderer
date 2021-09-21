@@ -5,7 +5,7 @@
 #ifndef CS655_RAY_H
 #define CS655_RAY_H
 
-#include "../Renderable/Common.h"
+#include "Common.h"
 #include <glm/vec3.hpp>
 
 namespace Rays {

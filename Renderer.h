@@ -8,7 +8,7 @@
 #include "Scene/SceneDescription.h"
 #include <array>
 
-const uint8_t MAX_DEPTH = 10;
+const uint8_t MAX_DEPTH = 3;
 
 class Renderer {
 private:

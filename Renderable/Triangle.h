@@ -15,12 +15,10 @@ private:
     glm::dvec3 _p3;
 public:
     Triangle(const std::unique_ptr<Material>& material, glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 p3);
-
-private:
-    glm::dvec3 calcNormal();
     std::optional<std::unique_ptr<Rays::Hit>> intersect(const Rays::Ray* ray) override;
 
-    const Material* getMaterial() override;
+private:
+    glm::dvec3 _calcNormal();
 };
 
 

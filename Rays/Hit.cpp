@@ -44,3 +44,7 @@ glm::dvec3 Rays::Hit::vectorTo(const glm::dvec3 &other) {
 BaseRenderable *Rays::Hit::getObject() const {
     return _object;
 }
+
+void Rays::Hit::setObject(BaseRenderable *object) {
+    _object = object;
+}

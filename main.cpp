@@ -13,8 +13,7 @@ int main(int argc, const char* argv[]) {
     MySDFParser parser;
     std::unique_ptr<SceneDescription> scene = parser.parse(stream);
 
-    const std::string path = "/home/dallin/Desktop/output.ppm";
     Renderer renderer;
-    renderer.render(std::move(scene), path);
+    renderer.render(std::move(scene), argv[2]);
     return 0;
 }

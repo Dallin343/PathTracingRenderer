@@ -14,10 +14,8 @@ private:
 public:
     Sphere(const std::unique_ptr<Material>& material, glm::dvec3 origin, double radius);
 
-private:
     std::optional<std::unique_ptr<Rays::Hit>> intersect(const Rays::Ray* ray) override;
 
-    const Material* getMaterial() override;
 };
 
 

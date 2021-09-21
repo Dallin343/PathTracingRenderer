@@ -84,8 +84,8 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
 }
 
 void Renderer::render(const std::string &outputFile) {
-    const int width = 1000;
-    const int height = 1000;
+    const int width = 200;
+    const int height = 200;
     auto image = std::vector<std::vector<glm::ivec3>>();
     image.resize(height);
 

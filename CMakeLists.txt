@@ -41,7 +41,7 @@ add_executable(CS655
         Lights/DirectionalLight.cpp
         Lights/DirectionalLight.h
         Parser/MySDFVisitor.cpp
-        Parser/MySDFVisitor.h Parser/MySDFParser.cpp Parser/MySDFParser.h Renderer.cpp Renderer.h Renderable/Polygon.cpp Renderable/Polygon.h Renderable/Triangle.cpp Renderable/Triangle.h Lights/PointLight.cpp Lights/PointLight.h)
+        Parser/MySDFVisitor.h Parser/MySDFParser.cpp Parser/MySDFParser.h Renderer.cpp Renderer.h Renderable/Polygon.cpp Renderable/Polygon.h Renderable/Triangle.cpp Renderable/Triangle.h Lights/PointLight.cpp Lights/PointLight.h Renderable/Plane.cpp Renderable/Plane.h Scene/BoundingBox.cpp Scene/BoundingBox.h)
 
 
 target_link_libraries(CS655 PRIVATE glm::glm antlr4_shared)

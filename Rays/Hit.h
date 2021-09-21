@@ -5,7 +5,7 @@
 #ifndef CS655_HIT_H
 #define CS655_HIT_H
 
-#include "Renderable/Common.h"
+#include "Common.h"
 class BaseRenderable;
 
 namespace Rays {
@@ -34,6 +34,8 @@ namespace Rays {
         glm::dvec3 vectorTo(const glm::dvec3& other);
 
         BaseRenderable *getObject() const;
+
+        void setObject(BaseRenderable *object);
     };
 }
 
