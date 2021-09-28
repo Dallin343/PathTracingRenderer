@@ -13,15 +13,27 @@ public:
     glm::dvec3 min, max;
 
     bool operator^(const Bounds &other) const {
-        return glm::all(glm::greaterThan(min, other.min)) and glm::all(glm::lessThan(max, other.max));
+        return glm::all(glm::greaterThanEqual(min, other.min)) && glm::all(glm::lessThanEqual(max, other.max));
     }
 
-    bool operator>(const Bounds &other) const {
-        return glm::all(glm::greaterThan(max, other.max));
+    glm::bvec3 operator>(const Bounds &other) const {
+        return glm::greaterThan(max, other.max);
     }
 
-    bool operator<(const Bounds &other) const {
-        return glm::all(glm::lessThan(min, other.min));
+    glm::bvec3 operator<(const Bounds &other) const {
+        return glm::lessThan(min, other.min);
+    }
+
+    double x() {
+        return glm::abs(max.x - min.x);
+    }
+
+    double y() {
+        return glm::abs(max.y - min.y);
+    }
+
+    double z() {
+        return glm::abs(max.z - min.z);
     }
 };
 

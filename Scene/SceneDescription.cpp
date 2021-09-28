@@ -44,6 +44,12 @@ const std::vector<std::unique_ptr<BaseRenderable>> &SceneDescription::getObjects
     return _objects;
 }
 
+std::vector<BaseRenderable *> SceneDescription::getRawObjects() const {
+    auto vec = std::vector<BaseRenderable *>();
+    std::transform(_objects.begin(), _objects.end(), std::back_inserter(vec), [](const std::unique_ptr<BaseRenderable>& obj) { return obj.get(); });
+    return vec;
+}
+
 
 const std::vector<std::unique_ptr<Light>> &SceneDescription::getLights() const {
     return _lights;

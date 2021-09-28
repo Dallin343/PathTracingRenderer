@@ -2,6 +2,7 @@
 #include <fstream>
 #include "Parser/MySDFParser.h"
 #include "Renderer.h"
+#include "Scene/BoundingBox.h"
 
 int main(int argc, const char* argv[]) {
     std::ifstream stream;
@@ -13,7 +14,10 @@ int main(int argc, const char* argv[]) {
     MySDFParser parser;
     std::unique_ptr<SceneDescription> scene = parser.parse(stream);
 
-    Renderer renderer;
-    renderer.render(std::move(scene), argv[2]);
+    BoundingBox boundingBox(scene->getRawObjects());
+    boundingBox.subdivide(0);
+
+    // Renderer renderer;
+    // renderer.render(std::move(scene), argv[2]);
     return 0;
 }

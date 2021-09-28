@@ -40,6 +40,7 @@ public:
     void setCamera(std::unique_ptr<Camera> camera);
 
     const std::vector<std::unique_ptr<BaseRenderable>> &getObjects() const;
+    std::vector<BaseRenderable *> getRawObjects() const;
 
     void pushObject(std::unique_ptr<BaseRenderable> object);
 
