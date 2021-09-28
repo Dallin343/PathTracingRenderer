@@ -103,16 +103,14 @@ void BoundingBox::subdivide(int level) {
         if (object->getBounds() ^ childBounds.first) {
             // If object is in the lower child.
             _lowerChild->pushObject(object);
-        } else if (object->getBounds() ^ childBounds.second) {
+        }
+        if (object->getBounds() ^ childBounds.second) {
             // If object is in the upper child.
             _upperChild->pushObject(object);
-        } else {
-            // If object is in neither.
-            filtered.push_back(object);
         }
     }
 
-    _objects.swap(filtered);
+    _objects.clear();
     _lowerChild->subdivide(level + 1);
     _upperChild->subdivide(level + 1);
 }

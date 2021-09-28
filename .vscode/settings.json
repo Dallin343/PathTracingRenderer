@@ -3,7 +3,7 @@
     "cmake.cmakePath": "/Applications/CMake.app/Contents/bin/cmake",
     "cmake.buildDirectory": "${workspaceFolder}/cmake-build-debug",
     "cmake.debugConfig": {
-        "args": ["/Users/dallinhagman/Documents/school/CS655/RayTracer/scene.sdf"],
+        "args": ["/Users/dallinhagman/Documents/school/CS655/RayTracer/scene.sdf", "/Users/dallinhagman/Desktop/BoundingOutput.ppm"],
         "stopAtEntry": false,
         "MIMode": "lldb",
         "miDebuggerPath": "/Users/dallinhagman/.vscode/extensions/ms-vscode.cpptools-1.6.0/debugAdapters/lldb-mi/bin/lldb-mi",

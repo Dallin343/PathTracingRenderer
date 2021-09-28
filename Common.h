@@ -13,7 +13,9 @@ public:
     glm::dvec3 min, max;
 
     bool operator^(const Bounds &other) const {
-        return glm::all(glm::greaterThanEqual(min, other.min)) && glm::all(glm::lessThanEqual(max, other.max));
+        bool minInside = glm::any(glm::greaterThanEqual(min, other.min)) && glm::any(glm::lessThanEqual(min, other.max));
+        bool maxInside = glm::any(glm::greaterThanEqual(max, other.min)) && glm::any(glm::lessThanEqual(max, other.max));
+        return minInside || maxInside;
     }
 
     glm::bvec3 operator>(const Bounds &other) const {
