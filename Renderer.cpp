@@ -20,21 +20,31 @@ void Renderer::render(std::unique_ptr<SceneDescription> scene, const std::string
     render(outputFile);
 }
 
-std::array<glm::dvec3, 4> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height) {
+std::vector<glm::dvec3> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height, uint32_t sub) {
     glm::dvec2 viewport = _scene->getCamera()->getViewportSize();
     double iStep = (viewport.x * 2.0) / width;
     double jStep = (viewport.y * 2.0) / height;
-    double iCorner = iStep / 4.0;
-    double jCorner = jStep / 4.0;
 
-    double u = i * iStep + (iStep / 2.0) - viewport.x;
-    double v = j * jStep + (jStep / 2.0) - viewport.y;
+    double iSubStep = iStep / (double)sub;
+    double jSubStep = jStep / (double)sub;
 
-    auto subPixels = std::array<glm::dvec3, 4>();
-    subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
-    subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
-    subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
-    subPixels[3] = glm::dvec3(u - iCorner, v - jCorner, 0.0);
+    double uStart = i * iStep - viewport.x;
+    double vStart = j * jStep - viewport.y;
+
+    std::vector<glm::dvec3> subPixels;
+    subPixels.resize(sub * sub);
+
+    for (int stepI = 0; stepI < sub; stepI++) {
+        for (int stepJ = 0; stepJ < sub; stepJ++) {
+            // double iJitter = _random(_randomEngine) * iSubStep;
+            // double jJitter = _random(_randomEngine) * jSubStep;
+            subPixels.emplace_back(uStart + (iSubStep / 2.0) * stepI, vStart + (jSubStep / 2.0) * stepJ, 0.0);
+        } 
+    }
+    // subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
+    // subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
+    // subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
+    // subPixels[3] = glm::dvec3(u - iCorner, v - jCorner, 0.0);
     return subPixels;
 }
 
@@ -84,8 +94,9 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
 }
 
 void Renderer::render(const std::string &outputFile) {
-    const int width = 480;
-    const int height = 480;
+    const uint32_t subPixels = 2;
+    const int width = 100;
+    const int height = 100;
     auto image = std::vector<std::vector<glm::ivec3>>();
     image.resize(height);
 
@@ -97,15 +108,15 @@ void Renderer::render(const std::string &outputFile) {
 
     for (uint32_t col = 0; col < width; col++) {
         for (uint32_t row = 0; row < height; row++) {
-            auto dirs = _getWorldspaceCoords(col, row, width, height);
+            auto dirs = _getWorldspaceCoords(col, row, width, height, 2);
 
             glm::dvec3 color = {0.0, 0.0, 0.0};
 
             for (const glm::dvec3 &dir: dirs) {
                 auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
-                color += _traceRay(camRay.get(), 0);
+                color += _traceRay(camRay.get());
             }
-            glm::dvec3 avg = color / 4.0;
+            glm::dvec3 avg = color / (double)(subPixels*subPixels);
             image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
         }
     }
