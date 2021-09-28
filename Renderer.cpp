@@ -44,9 +44,11 @@ std::vector<glm::dvec3> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, u
             // double jJitter = _random(_randomEngine) * jSubStep;
             // subPixels.emplace_back(uStart + iSubStep * stepI + iJitter, vStart + jSubStep * stepJ + jJitter, 0.0);
             // std::cout << "(" <<  currI + (iSubStep / 2.0) << ", " << currJ + (jSubStep / 2.0) << ")" << std::endl << std::endl;
+            std::cout << printVec(glm::dvec3(currI + (iSubStep / 2.0), currJ + (jSubStep / 2.0), 0.0)) << std::endl;
             subPixels.emplace_back(currI + (iSubStep / 2.0), currJ + (jSubStep / 2.0), 0.0);
-        } 
+        }
     }
+    std::cout << std::endl;
     // subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
     // subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
     // subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
@@ -112,6 +114,9 @@ void Renderer::render(const std::string &outputFile) {
     const uint32_t subPixels = 2;
     const int width = 480;
     const int height = 480;
+    double percent = (double)width / 10.0;
+    int percentString = 10;
+
     auto image = std::vector<std::vector<glm::ivec3>>();
     image.resize(height);
 
@@ -127,31 +132,36 @@ void Renderer::render(const std::string &outputFile) {
             for (uint32_t col = 0; col < height; col++) {
                 auto dirs = _getWorldspaceCoords(col, row, width, height, 2);
 
-                glm::dvec3 color = {0.0, 0.0, 0.0};
+                // glm::dvec3 color = {0.0, 0.0, 0.0};
 
-                for (const glm::dvec3 &dir: dirs) {
-                    auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
-                    color += _traceRay(camRay.get());
-                }
-                glm::dvec3 avg = color / (double)(subPixels*subPixels);
-                image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
+                // for (const glm::dvec3 &dir: dirs) {
+                //     auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
+                //     color += _traceRay(camRay.get());
+                // }
+                // glm::dvec3 avg = color / (double)(subPixels*subPixels);
+                // image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
             }
+            // if ((double)row > percent) {
+            //     std::cout << percentString << "%" << std::endl;
+            //     percent += (double)width/10.0;
+            //     percentString += 10;
+            // }
         }
     }
 
-    std::ofstream stream(outputFile);
+    // std::ofstream stream(outputFile);
 
-    {
-        PROFILE_SCOPE("Writing");
-        stream << "P3" << std::endl << width << " " << height << std::endl << "255" << std::endl;
-        for (const auto &row: image) {
-            for (const auto &col: row) {
-                stream << col.x << " " << col.y << " " << col.z << " ";
-            }
-            stream << std::endl;
-        }
-        stream.close();
-    }
+    // {
+    //     PROFILE_SCOPE("Writing");
+    //     stream << "P3" << std::endl << width << " " << height << std::endl << "255" << std::endl;
+    //     for (const auto &row: image) {
+    //         for (const auto &col: row) {
+    //             stream << col.x << " " << col.y << " " << col.z << " ";
+    //         }
+    //         stream << std::endl;
+    //     }
+    //     stream.close();
+    // }
 }
 
 

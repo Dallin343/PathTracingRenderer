@@ -85,7 +85,7 @@ bool BoundingBox::_intersectPlane(double& tnear, double& tfar, double o, double 
     return true;
 }
 
-const uint8_t SUBDIVISION_LIMIT = 20;
+const uint8_t SUBDIVISION_LIMIT = 10;
 const uint8_t MIN_OBJECTS = 1;
 void BoundingBox::subdivide(int level) {
 PROFILE_FUNCTION();
