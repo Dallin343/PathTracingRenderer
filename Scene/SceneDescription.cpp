@@ -5,6 +5,7 @@
 #include "SceneDescription.h"
 
 #include <utility>
+#include <algorithm>
 
 SceneDescription::SceneDescription() = default;
 

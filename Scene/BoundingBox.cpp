@@ -35,32 +35,35 @@ std::optional<std::unique_ptr<Rays::Hit>> BoundingBox::intersect(Rays::Ray *ray)
     auto origin = ray->getOrigin();
     auto dir = ray->getDirection();
 
-    double tNear = std::numeric_limits<double>::max();
+    double tNear = std::numeric_limits<double>::min();
     double tFar = std::numeric_limits<double>::max();
 
-    glm::bvec3 hit = {
-        _intersectPlane(tNear, tFar, origin.x, dir.x, _bounds.min.x, _bounds.max.x),
-        _intersectPlane(tNear, tFar, origin.y, dir.y, _bounds.min.y, _bounds.max.y),
-        _intersectPlane(tNear, tFar, origin.z, dir.z, _bounds.min.z, _bounds.max.z)
-    };
-
-    if (glm::all(hit)) {
-        if (_objects.empty()) {
-            auto lowerHit = _lowerChild->intersect(ray);
-            auto upperHit = _lowerChild->intersect(ray);
-            if (!lowerHit.has_value()) return upperHit;
-            if (!upperHit.has_value()) return lowerHit;
-            
-        }
-        if (!_objects.empty()) {
-            auto hit = _findHit(ray);
-            if (hit.has_value()) {
-                return hit;
-            }
-        }
-    } else {
+    if (!_intersectPlane(tNear, tFar, origin.x, dir.x, _bounds.min.x, _bounds.max.x)) {
         return std::nullopt;
     }
+    if (!_intersectPlane(tNear, tFar, origin.y, dir.y, _bounds.min.y, _bounds.max.y)) {
+        return std::nullopt;
+    }
+    if (!_intersectPlane(tNear, tFar, origin.z, dir.z, _bounds.min.z, _bounds.max.z)) {
+        return std::nullopt;
+    }
+
+    auto closestHit = _findHit(ray);
+    if (closestHit.has_value()) {
+        return closestHit;
+    }
+
+    if (_lowerChild != nullptr) {
+        auto lowerHit = _lowerChild->intersect(ray);
+        if (lowerHit.has_value()) return lowerHit;
+    }
+
+    if (_upperChild != nullptr) {
+        auto upperHit = _upperChild->intersect(ray);
+        if (upperHit.has_value()) return upperHit;
+    }
+
+    return std::nullopt;
 }
 
 bool BoundingBox::_intersectPlane(double& tnear, double& tfar, double o, double d, double l, double h) {

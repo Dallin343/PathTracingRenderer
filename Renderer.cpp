@@ -84,13 +84,16 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
 }
 
 void Renderer::render(const std::string &outputFile) {
-    const int width = 200;
-    const int height = 200;
+    const int width = 480;
+    const int height = 480;
     auto image = std::vector<std::vector<glm::ivec3>>();
     image.resize(height);
 
 
     const glm::dvec3 from = _scene->getCamera()->getLookFrom();
+
+    _boundingBox = std::make_unique<BoundingBox>(_scene->getRawObjects());
+    _boundingBox->subdivide();
 
     for (uint32_t col = 0; col < width; col++) {
         for (uint32_t row = 0; row < height; row++) {
@@ -145,20 +148,21 @@ glm::dvec3 Renderer::_calculateIllumination(Rays::Ray *ray, Rays::Hit *hit) {
 }
 
 std::optional<std::unique_ptr<Rays::Hit>> Renderer::_findHit(Rays::Ray *ray) {
-    std::optional<std::unique_ptr<Rays::Hit>> closestHit = std::nullopt;
-    for (const auto &object: _scene->getObjects()) {
-        std::optional<std::unique_ptr<Rays::Hit>> hit = object->intersect(ray);
-        if (!hit.has_value()) {
-            continue;
-        }
-
-        if (!closestHit.has_value()) {
-            closestHit = std::move(hit);
-        } else if (hit.value()->distanceTo(ray->getOrigin()) < closestHit.value()->distanceTo(ray->getOrigin())) {
-            closestHit = std::move(hit);
-        }
-    }
-    return closestHit;
+    return _boundingBox->intersect(ray);
+//    std::optional<std::unique_ptr<Rays::Hit>> closestHit = std::nullopt;
+//    for (const auto &object: _scene->getObjects()) {
+//        std::optional<std::unique_ptr<Rays::Hit>> hit = object->intersect(ray);
+//        if (!hit.has_value()) {
+//            continue;
+//        }
+//
+//        if (!closestHit.has_value()) {
+//            closestHit = std::move(hit);
+//        } else if (hit.value()->distanceTo(ray->getOrigin()) < closestHit.value()->distanceTo(ray->getOrigin())) {
+//            closestHit = std::move(hit);
+//        }
+//    }
+//    return closestHit;
 }
 
 std::unique_ptr<Rays::ReflectionRay> Renderer::_reflect(Rays::Ray *ray, Rays::Hit *hit) {

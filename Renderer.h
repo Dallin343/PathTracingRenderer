@@ -6,6 +6,7 @@
 #define CS655_RENDERER_H
 
 #include "Scene/SceneDescription.h"
+#include <Scene/BoundingBox.h>
 #include <array>
 
 const uint8_t MAX_DEPTH = 3;
@@ -21,6 +22,7 @@ private:
     static double _fresnel(Rays::Ray* ray, Rays::Hit* hit);
     std::array<glm::dvec3, 4> _getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height);
     std::unique_ptr<SceneDescription> _scene;
+    std::unique_ptr<BoundingBox> _boundingBox;
 public:
     Renderer();
 

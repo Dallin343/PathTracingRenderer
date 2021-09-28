@@ -5,6 +5,11 @@
 #include "Scene/BoundingBox.h"
 
 int main(int argc, const char* argv[]) {
+    if (argc != 3) {
+        std::cerr << "Need 2 arguments." << std::endl;
+        return 1;
+    }
+
     std::ifstream stream;
     stream.open(argv[1]);
     if (!stream.is_open()) {
@@ -14,10 +19,7 @@ int main(int argc, const char* argv[]) {
     MySDFParser parser;
     std::unique_ptr<SceneDescription> scene = parser.parse(stream);
 
-    BoundingBox boundingBox(scene->getRawObjects());
-    boundingBox.subdivide(0);
-
-    // Renderer renderer;
-    // renderer.render(std::move(scene), argv[2]);
+    Renderer renderer;
+    renderer.render(std::move(scene), argv[2]);
     return 0;
 }
