@@ -32,6 +32,7 @@ BoundingBox::BoundingBox(const std::vector<BaseRenderable *>& objects) {
 }
 
 std::optional<std::unique_ptr<Rays::Hit>> BoundingBox::intersect(Rays::Ray *ray) {
+    PROFILE_FUNCTION();
     auto origin = ray->getOrigin();
     auto dir = ray->getDirection();
 
@@ -87,7 +88,7 @@ bool BoundingBox::_intersectPlane(double& tnear, double& tfar, double o, double 
 const uint8_t SUBDIVISION_LIMIT = 20;
 const uint8_t MIN_OBJECTS = 1;
 void BoundingBox::subdivide(int level) {
-
+PROFILE_FUNCTION();
     if (level >= SUBDIVISION_LIMIT || _objects.size() <= MIN_OBJECTS) {
         return;
     }

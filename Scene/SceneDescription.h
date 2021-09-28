@@ -5,6 +5,8 @@
 #ifndef CS655_SCENEDESCRIPTION_H
 #define CS655_SCENEDESCRIPTION_H
 
+#include "Common.h"
+
 #include <glm/vec3.hpp>
 #include <vector>
 #include <unordered_map>

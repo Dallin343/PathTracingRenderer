@@ -14,6 +14,7 @@ Triangle::Triangle(const std::unique_ptr<Material> &material, glm::dvec3 p1, glm
 }
 
 std::optional<std::unique_ptr<Rays::Hit>> Triangle::intersect(const Rays::Ray *ray) {
+    PROFILE_FUNCTION();
     double e = 0.000001;
     glm::dvec3 w0 = ray->getOrigin() - _p2;
     double num = -(glm::dot(_calcNormal(), w0));

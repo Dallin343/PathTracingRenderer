@@ -16,11 +16,13 @@ std::string printVec(const glm::dvec3 &vec) {
 }
 
 void Renderer::render(std::unique_ptr<SceneDescription> scene, const std::string &outputFile) {
+    PROFILE_FUNCTION();
     _scene = std::move(scene);
     render(outputFile);
 }
 
 std::vector<glm::dvec3> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height, uint32_t sub) {
+    PROFILE_FUNCTION();
     glm::dvec2 viewport = _scene->getCamera()->getViewportSize();
     double iStep = (viewport.x * 2.0) / width;
     double jStep = (viewport.y * 2.0) / height;
@@ -35,10 +37,14 @@ std::vector<glm::dvec3> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, u
     subPixels.resize(sub * sub);
 
     for (int stepI = 0; stepI < sub; stepI++) {
+        double currI = uStart + iSubStep * stepI;
         for (int stepJ = 0; stepJ < sub; stepJ++) {
+            double currJ = vStart + jSubStep * stepJ;
             // double iJitter = _random(_randomEngine) * iSubStep;
             // double jJitter = _random(_randomEngine) * jSubStep;
-            subPixels.emplace_back(uStart + (iSubStep / 2.0) * stepI, vStart + (jSubStep / 2.0) * stepJ, 0.0);
+            // subPixels.emplace_back(uStart + iSubStep * stepI + iJitter, vStart + jSubStep * stepJ + jJitter, 0.0);
+            // std::cout << "(" <<  currI + (iSubStep / 2.0) << ", " << currJ + (jSubStep / 2.0) << ")" << std::endl << std::endl;
+            subPixels.emplace_back(currI + (iSubStep / 2.0), currJ + (jSubStep / 2.0), 0.0);
         } 
     }
     // subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
@@ -49,6 +55,7 @@ std::vector<glm::dvec3> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, u
 }
 
 glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
+    PROFILE_FUNCTION();
     auto closestHit = _findHit(ray);
 
     if (!closestHit.has_value()) {
@@ -66,21 +73,27 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
     glm::dvec3 transmissionColor = {0.0, 0.0, 0.0};
 
     switch (material->getType()) {
-        case Diffuse:
+        case Diffuse: {
+            PROFILE_SCOPE("Diffuse Tracing");
             color = _calculateIllumination(ray, hit.get());
             if (material->getReflectiveFac() > 0.0) {
+                PROFILE_SCOPE("Reflection");
                 auto reflectionRay = _reflect(ray, hit.get());
                 reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
             }
             color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
             color += _scene->getAmbientColor() * _scene->getAmbientFac() * material->getDiffuseColor();
             break;
-        case Transparent:
+        }
+        case Transparent: {
+            PROFILE_SCOPE("Transparent Tracing");
             if (material->getReflectiveFac() > 0.0) {
+                PROFILE_SCOPE("Reflection");
                 auto reflectionRay = _reflect(ray, hit.get());
                 reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
             }
             if (material->getTransmissionFac() > 0.0) {
+                PROFILE_SCOPE("Transmission");
                 auto transmissionRay = _refract(ray, hit.get());
                 transmissionColor += _traceRay(transmissionRay.get(), depth + 1);
             }
@@ -88,12 +101,14 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
             color = reflectiveColor * kr + transmissionColor * (1 - kr);
             color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
             break;
+        }
     }
 
     return glm::clamp(color, 0.0, 1.0);
 }
 
 void Renderer::render(const std::string &outputFile) {
+    PROFILE_FUNCTION();
     const uint32_t subPixels = 2;
     const int width = 480;
     const int height = 480;
@@ -106,31 +121,37 @@ void Renderer::render(const std::string &outputFile) {
     _boundingBox = std::make_unique<BoundingBox>(_scene->getRawObjects());
     _boundingBox->subdivide();
 
-    for (uint32_t col = 0; col < width; col++) {
-        for (uint32_t row = 0; row < height; row++) {
-            auto dirs = _getWorldspaceCoords(col, row, width, height, 2);
+    {
+        PROFILE_SCOPE("RenderLoop");
+        for (uint32_t row = 0; row < width; row++) {
+            for (uint32_t col = 0; col < height; col++) {
+                auto dirs = _getWorldspaceCoords(col, row, width, height, 2);
 
-            glm::dvec3 color = {0.0, 0.0, 0.0};
+                glm::dvec3 color = {0.0, 0.0, 0.0};
 
-            for (const glm::dvec3 &dir: dirs) {
-                auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
-                color += _traceRay(camRay.get());
+                for (const glm::dvec3 &dir: dirs) {
+                    auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
+                    color += _traceRay(camRay.get());
+                }
+                glm::dvec3 avg = color / (double)(subPixels*subPixels);
+                image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
             }
-            glm::dvec3 avg = color / (double)(subPixels*subPixels);
-            image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
         }
     }
 
     std::ofstream stream(outputFile);
 
-    stream << "P3" << std::endl << width << " " << height << std::endl << "255" << std::endl;
-    for (const auto &row: image) {
-        for (const auto &col: row) {
-            stream << col.x << " " << col.y << " " << col.z << " ";
+    {
+        PROFILE_SCOPE("Writing");
+        stream << "P3" << std::endl << width << " " << height << std::endl << "255" << std::endl;
+        for (const auto &row: image) {
+            for (const auto &col: row) {
+                stream << col.x << " " << col.y << " " << col.z << " ";
+            }
+            stream << std::endl;
         }
-        stream << std::endl;
+        stream.close();
     }
-    stream.close();
 }
 
 
@@ -139,6 +160,7 @@ Renderer::Renderer(std::unique_ptr<SceneDescription> scene) {
 }
 
 glm::dvec3 Renderer::_calculateIllumination(Rays::Ray *ray, Rays::Hit *hit) {
+    PROFILE_FUNCTION();
     BaseRenderable *object = hit->getObject();
     auto material = object->getMaterial();
     glm::dvec3 color = {0.0, 0.0, 0.0};

@@ -5,6 +5,7 @@
 #ifndef CS655_RENDERER_H
 #define CS655_RENDERER_H
 
+#include "Common.h"
 #include "Scene/SceneDescription.h"
 #include <Scene/BoundingBox.h>
 #include <array>

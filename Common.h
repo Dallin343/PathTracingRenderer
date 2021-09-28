@@ -6,6 +6,7 @@
 #define CS655_COMMON_H
 
 #include <glm.hpp>
+#include <Debug/Instrumentor.h>
 
 
 class Bounds {

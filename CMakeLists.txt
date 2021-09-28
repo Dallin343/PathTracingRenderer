@@ -26,6 +26,7 @@ add_subdirectory(Vendor/glm)
 
 add_executable(CS655
         ${ANTLR_SDFParser_CXX_OUTPUTS}
+        Debug/Instrumentor.h
         main.cpp
         Material/Material.cpp
         Rays/Ray.cpp
