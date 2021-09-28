@@ -35,6 +35,11 @@ std::array<glm::dvec3, 4> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j,
     subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
     subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
     subPixels[3] = glm::dvec3(u - iCorner, v - jCorner, 0.0);
+
+    // std::cout << printVec(subPixels[0]) << std::endl;
+    // std::cout << printVec(subPixels[1]) << std::endl;
+    // std::cout << printVec(subPixels[2]) << std::endl;
+    // std::cout << printVec(subPixels[3]) << std::endl << std::endl;
     return subPixels;
 }
 
@@ -89,14 +94,17 @@ void Renderer::render(const std::string &outputFile) {
     auto image = std::vector<std::vector<glm::ivec3>>();
     image.resize(height);
 
+    double percent = (double) width / 10.0;
+    int percentString = 10;
+
 
     const glm::dvec3 from = _scene->getCamera()->getLookFrom();
 
     _boundingBox = std::make_unique<BoundingBox>(_scene->getRawObjects());
     _boundingBox->subdivide();
 
-    for (uint32_t col = 0; col < width; col++) {
-        for (uint32_t row = 0; row < height; row++) {
+    for (uint32_t row = 0; row < width; row++) {
+        for (uint32_t col = 0; col < height; col++) {
             auto dirs = _getWorldspaceCoords(col, row, width, height);
 
             glm::dvec3 color = {0.0, 0.0, 0.0};
@@ -108,6 +116,12 @@ void Renderer::render(const std::string &outputFile) {
             glm::dvec3 avg = color / 4.0;
             image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
         }
+
+            if ((double)row > percent) {
+                std::cout << percentString << "%" << std::endl;
+                percent += (double)width/10.0;
+                percentString += 10;
+            }
     }
 
     std::ofstream stream(outputFile);
