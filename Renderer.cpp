@@ -8,6 +8,7 @@
 #include <sstream>
 #include <glm/gtx/vector_angle.hpp>
 #include "Renderer.h"
+#include <thread>
 
 std::string printVec(const glm::dvec3 &vec) {
     std::stringstream stream;
@@ -34,25 +35,17 @@ std::vector<glm::dvec3> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, u
     double vStart = j * jStep - viewport.y;
 
     std::vector<glm::dvec3> subPixels;
-    subPixels.resize(sub * sub);
+    subPixels.reserve(sub * sub);
 
     for (int stepI = 0; stepI < sub; stepI++) {
         double currI = uStart + iSubStep * stepI;
         for (int stepJ = 0; stepJ < sub; stepJ++) {
             double currJ = vStart + jSubStep * stepJ;
-            // double iJitter = _random(_randomEngine) * iSubStep;
-            // double jJitter = _random(_randomEngine) * jSubStep;
-            // subPixels.emplace_back(uStart + iSubStep * stepI + iJitter, vStart + jSubStep * stepJ + jJitter, 0.0);
-            // std::cout << "(" <<  currI + (iSubStep / 2.0) << ", " << currJ + (jSubStep / 2.0) << ")" << std::endl << std::endl;
-            std::cout << printVec(glm::dvec3(currI + (iSubStep / 2.0), currJ + (jSubStep / 2.0), 0.0)) << std::endl;
-            subPixels.emplace_back(currI + (iSubStep / 2.0), currJ + (jSubStep / 2.0), 0.0);
+             double iJitter = _random(_randomEngine) * iSubStep;
+             double jJitter = _random(_randomEngine) * jSubStep;
+            subPixels.emplace_back(currI + iJitter, currJ + jJitter, 0.0);
         }
     }
-    std::cout << std::endl;
-    // subPixels[0] = glm::dvec3(u - iCorner, v + jCorner, 0.0);
-    // subPixels[1] = glm::dvec3(u + iCorner, v + jCorner, 0.0);
-    // subPixels[2] = glm::dvec3(u + iCorner, v - jCorner, 0.0);
-    // subPixels[3] = glm::dvec3(u - iCorner, v - jCorner, 0.0);
     return subPixels;
 }
 
@@ -81,7 +74,15 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
             if (material->getReflectiveFac() > 0.0) {
                 PROFILE_SCOPE("Reflection");
                 auto reflectionRay = _reflect(ray, hit.get());
-                reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
+                if (material->getGlossyFac() > 0.0) {
+                    glm::dvec3 tempColor = {};
+                    for (int i = 0; i < NUM_JITTERS; i++) {
+                        tempColor += _traceRay(_jitter(reflectionRay.get()).get(), depth + 1);
+                    }
+                    reflectiveColor += tempColor / (double)NUM_JITTERS;
+                } else {
+                    reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
+                }
             }
             color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
             color += _scene->getAmbientColor() * _scene->getAmbientFac() * material->getDiffuseColor();
@@ -92,12 +93,28 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
             if (material->getReflectiveFac() > 0.0) {
                 PROFILE_SCOPE("Reflection");
                 auto reflectionRay = _reflect(ray, hit.get());
-                reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
+                if (material->getGlossyFac() > 0.0) {
+                    glm::dvec3 tempColor = {};
+                    for (int i = 0; i < NUM_JITTERS; i++) {
+                        tempColor += _traceRay(_jitter(reflectionRay.get()).get(), depth + 1);
+                    }
+                    reflectiveColor += tempColor / (double)NUM_JITTERS;
+                } else {
+                    reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
+                }
             }
             if (material->getTransmissionFac() > 0.0) {
                 PROFILE_SCOPE("Transmission");
                 auto transmissionRay = _refract(ray, hit.get());
-                transmissionColor += _traceRay(transmissionRay.get(), depth + 1);
+                if (material->getTranslucencyFac() > 0.0) {
+                    glm::dvec3 tempColor = {};
+                    for (int i = 0; i < NUM_JITTERS; i++) {
+                        tempColor += _traceRay(_jitter(transmissionRay.get()).get(), depth + 1);
+                    }
+                    transmissionColor += tempColor / (double)NUM_JITTERS;
+                } else {
+                    transmissionColor += _traceRay(transmissionRay.get(), depth + 1);
+                }
             }
             double kr = _fresnel(ray, hit.get());
             color = reflectiveColor * kr + transmissionColor * (1 - kr);
@@ -111,57 +128,59 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
 
 void Renderer::render(const std::string &outputFile) {
     PROFILE_FUNCTION();
-    const uint32_t subPixels = 2;
-    const int width = 480;
-    const int height = 480;
-    double percent = (double)width / 10.0;
-    int percentString = 10;
 
     auto image = std::vector<std::vector<glm::ivec3>>();
-    image.resize(height);
+    image.resize(HEIGHT);
 
+    int threadInc = HEIGHT / NUM_THREADS;
+
+    std::vector<std::thread> threads;
 
     const glm::dvec3 from = _scene->getCamera()->getLookFrom();
 
     _boundingBox = std::make_unique<BoundingBox>(_scene->getRawObjects());
     _boundingBox->subdivide();
 
-    {
-        PROFILE_SCOPE("RenderLoop");
-        for (uint32_t row = 0; row < width; row++) {
-            for (uint32_t col = 0; col < height; col++) {
-                auto dirs = _getWorldspaceCoords(col, row, width, height, 2);
+    auto loop = [&](int start, int end) {
+        for (uint32_t row = start; row < end; row++) {
+            for (uint32_t col = 0; col < WIDTH; col++) {
+                auto dirs = _getWorldspaceCoords(row, col, WIDTH, HEIGHT, SUB_PIXELS);
 
-                // glm::dvec3 color = {0.0, 0.0, 0.0};
+                glm::dvec3 color = {0.0, 0.0, 0.0};
 
-                // for (const glm::dvec3 &dir: dirs) {
-                //     auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
-                //     color += _traceRay(camRay.get());
-                // }
-                // glm::dvec3 avg = color / (double)(subPixels*subPixels);
-                // image.at(col).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
+                for (const glm::dvec3 &dir: dirs) {
+                    auto camRay = std::make_unique<Rays::CameraRay>(from, glm::normalize(dir - from));
+                    color += _traceRay(camRay.get());
+                }
+                glm::dvec3 avg = color / (double) (SUB_PIXELS * SUB_PIXELS);
+                image.at(row).push_back(glm::ivec3(int(avg.x * 255.0), int(avg.y * 255.0), int(avg.z * 255.0)));
             }
-            // if ((double)row > percent) {
-            //     std::cout << percentString << "%" << std::endl;
-            //     percent += (double)width/10.0;
-            //     percentString += 10;
-            // }
         }
+    };
+
+    int start = 0;
+    while (start + threadInc <= HEIGHT) {
+        threads.emplace_back(loop, start, std::min(start + threadInc, HEIGHT));
+        start += threadInc;
     }
 
-    // std::ofstream stream(outputFile);
+    for (auto& t : threads) {
+        t.join();
+    }
 
-    // {
-    //     PROFILE_SCOPE("Writing");
-    //     stream << "P3" << std::endl << width << " " << height << std::endl << "255" << std::endl;
-    //     for (const auto &row: image) {
-    //         for (const auto &col: row) {
-    //             stream << col.x << " " << col.y << " " << col.z << " ";
-    //         }
-    //         stream << std::endl;
-    //     }
-    //     stream.close();
-    // }
+    std::ofstream stream(outputFile);
+
+    {
+        PROFILE_SCOPE("Writing");
+        stream << "P3" << std::endl << WIDTH << " " << HEIGHT << std::endl << "255" << std::endl;
+        for (const auto &row: image) {
+            for (const auto &col: row) {
+                stream << col.x << " " << col.y << " " << col.z << " ";
+            }
+            stream << std::endl;
+        }
+        stream.close();
+    }
 }
 
 
@@ -192,20 +211,6 @@ glm::dvec3 Renderer::_calculateIllumination(Rays::Ray *ray, Rays::Hit *hit) {
 
 std::optional<std::unique_ptr<Rays::Hit>> Renderer::_findHit(Rays::Ray *ray) {
     return _boundingBox->intersect(ray);
-//    std::optional<std::unique_ptr<Rays::Hit>> closestHit = std::nullopt;
-//    for (const auto &object: _scene->getObjects()) {
-//        std::optional<std::unique_ptr<Rays::Hit>> hit = object->intersect(ray);
-//        if (!hit.has_value()) {
-//            continue;
-//        }
-//
-//        if (!closestHit.has_value()) {
-//            closestHit = std::move(hit);
-//        } else if (hit.value()->distanceTo(ray->getOrigin()) < closestHit.value()->distanceTo(ray->getOrigin())) {
-//            closestHit = std::move(hit);
-//        }
-//    }
-//    return closestHit;
 }
 
 std::unique_ptr<Rays::ReflectionRay> Renderer::_reflect(Rays::Ray *ray, Rays::Hit *hit) {
@@ -260,6 +265,14 @@ double Renderer::_fresnel(Rays::Ray *ray, Rays::Hit *hit) {
         double Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
         return (Rs * Rs + Rp * Rp) / 2.0;
     }
+}
+
+std::unique_ptr<Rays::Ray> Renderer::_jitter(Rays::Ray *ray) {
+    auto x = _random(_randomEngine) * JITTER_BIAS;
+    auto y = _random(_randomEngine) * JITTER_BIAS;
+    auto z = _random(_randomEngine) * JITTER_BIAS;
+    glm::dvec3 rand = {x, y, z};
+    return std::make_unique<Rays::Ray>(ray->getOrigin(), glm::normalize(ray->getDirection() + rand));
 }
 
 Renderer::Renderer() = default;

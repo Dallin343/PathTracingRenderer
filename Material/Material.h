@@ -15,15 +15,16 @@ enum MaterialType {
 class Material {
 private:
     MaterialType _type{};
-    double _diffuseFac{}, _specularFac{}, _reflectiveFac{}, _transmissionFac{}, _phongConst{}, _ior{};
+    double _diffuseFac{}, _specularFac{}, _reflectiveFac{}, _glossyFac{}, _transmissionFac{}, _translucencyFac{};
+    double _phongConst{}, _ior{};
     glm::dvec3 _diffuseColor{}, _specularColor{};
 public:
     Material();
 
-    Material(double diffuseFac, double specularFac, double reflectiveFac, double phongConst,
+    Material(double diffuseFac, double specularFac, double reflectiveFac, double glossy, double phongConst,
              const glm::dvec3 &diffuseColor, const glm::dvec3 &specularColor);
 
-    Material(double reflectiveFac, double transmissionFac, double ior);
+    Material(double reflectiveFac, double glossy, double transmissionFac, double translucency, double ior);
 
     double getDiffuseFac() const;
 
@@ -38,6 +39,10 @@ public:
     const glm::dvec3 &getSpecularColor() const;
 
     double getSpecularFac() const;
+
+    double getGlossyFac() const;
+
+    double getTranslucencyFac() const;
 
     double getIor() const;
 

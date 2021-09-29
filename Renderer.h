@@ -11,7 +11,13 @@
 #include <array>
 #include <random>
 
-const uint8_t MAX_DEPTH = 3;
+const uint8_t MAX_DEPTH = 4;
+const int NUM_JITTERS = 4;
+const double JITTER_BIAS = 0.1;
+const int NUM_THREADS = 12;
+const uint32_t SUB_PIXELS = 4;
+const int WIDTH = 480;
+const int HEIGHT = 480;
 
 class Renderer {
 private:
@@ -21,9 +27,9 @@ private:
 
     static std::unique_ptr<Rays::ReflectionRay> _reflect(Rays::Ray* ray, Rays::Hit* hit);
     static std::unique_ptr<Rays::TransmissionRay> _refract(Rays::Ray* ray, Rays::Hit* hit);
+    std::unique_ptr<Rays::Ray> _jitter(Rays::Ray* ray);
     static double _fresnel(Rays::Ray* ray, Rays::Hit* hit);
     std::vector<glm::dvec3> _getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height, uint32_t sub);
-    // glm::dvec3 _jitter()
 
 public:
     Renderer();

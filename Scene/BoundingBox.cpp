@@ -54,14 +54,17 @@ std::optional<std::unique_ptr<Rays::Hit>> BoundingBox::intersect(Rays::Ray *ray)
         return closestHit;
     }
 
-    if (_lowerChild != nullptr) {
+    if (_lowerChild != nullptr && _upperChild != nullptr) {
         auto lowerHit = _lowerChild->intersect(ray);
-        if (lowerHit.has_value()) return lowerHit;
-    }
-
-    if (_upperChild != nullptr) {
         auto upperHit = _upperChild->intersect(ray);
-        if (upperHit.has_value()) return upperHit;
+        if (lowerHit.has_value() && upperHit.has_value()) {
+            auto lowerDistance = lowerHit.value()->distanceTo(origin);
+            auto upperDistance = upperHit.value()->distanceTo(origin);
+            if (lowerDistance < upperDistance) return lowerHit;
+            else return upperHit;
+        }
+        else if (lowerHit.has_value()) return lowerHit;
+        else if (upperHit.has_value()) return upperHit;
     }
 
     return std::nullopt;
@@ -85,7 +88,7 @@ bool BoundingBox::_intersectPlane(double& tnear, double& tfar, double o, double 
     return true;
 }
 
-const uint8_t SUBDIVISION_LIMIT = 10;
+const uint8_t SUBDIVISION_LIMIT = 20;
 const uint8_t MIN_OBJECTS = 1;
 void BoundingBox::subdivide(int level) {
 PROFILE_FUNCTION();

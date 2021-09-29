@@ -74,13 +74,16 @@ antlrcpp::Any MySDFVisitor::visitMaterial(antlrcpp::SDFParser::MaterialContext *
         double kd = std::stod(ctx->kd->getText());
         double ks = std::stod(ctx->ks->getText());
         double kr = std::stod(ctx->kr->getText());
-        auto mat = std::make_unique<Material>(kd, ks, kr, n, kdRgb, ksRgb);
+        double kg = std::stod(ctx->kg->getText());
+        auto mat = std::make_unique<Material>(kd, ks, kr, kg, n, kdRgb, ksRgb);
         _sceneDescription->insertMaterial(num, std::move(mat));
     } else if (type == "Transparent") {
         double kr = std::stod(ctx->kr->getText());
+        double kg = std::stod(ctx->kg->getText());
         double kt = std::stod(ctx->kt->getText());
+        double ktrans = std::stod(ctx->ktrans->getText());
         double ior = std::stod(ctx->ior->getText());
-        auto mat = std::make_unique<Material>(kr, kt, ior);
+        auto mat = std::make_unique<Material>(kr, kg, kt, ktrans, ior);
         _sceneDescription->insertMaterial(num, std::move(mat));
     }
 
