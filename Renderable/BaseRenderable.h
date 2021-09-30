@@ -6,13 +6,12 @@
 #define CS655_BASERENDERABLE_H
 
 #include "Common.h"
+#include <iostream>
 
 #include "Material/Material.h"
 #include "Rays/Ray.h"
 #include "Rays/Hit.h"
-#include <iostream>
-#include <optional>
-#include <memory>
+
 
 class BaseRenderable {
 protected:

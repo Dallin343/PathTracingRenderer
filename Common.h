@@ -6,7 +6,14 @@
 #define CS655_COMMON_H
 
 #include <glm.hpp>
+#include <memory>
+#include <vector>
+#include <unordered_map>
+#include <optional>
 #include <Debug/Instrumentor.h>
+
+const double BIAS = 1e-6;
+const int NUM_SHADOW_SAMPLES = 6;
 
 
 class Bounds {

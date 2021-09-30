@@ -5,7 +5,8 @@
 #ifndef CS655_MATERIAL_H
 #define CS655_MATERIAL_H
 
-#include <glm.hpp>
+#include "Common.h"
+
 
 enum MaterialType {
     Diffuse,

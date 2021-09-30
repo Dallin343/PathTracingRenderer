@@ -30,14 +30,3 @@ DirectionalLight::calculateSpecular(const Rays::Ray *ray, const Rays::Hit *hit, 
     return material->getSpecularColor() * material->getSpecularFac() * glm::pow(angle, 4) *
            _color;
 }
-
-bool DirectionalLight::inShadow(const Rays::Ray *ray, const Rays::Hit *hit,
-                                const std::vector<std::unique_ptr<BaseRenderable>> &objects) {
-    auto adjOrigin = hit->getPoint() + _position * 0.0001;
-    auto shadowRay = std::make_unique<Rays::IlluminationRay>(adjOrigin, _position);
-    return Light::inShadow(shadowRay.get(), hit, objects);
-}
-
-double DirectionalLight::_intensity(const Rays::Ray *) {
-    return 1.0;
-}

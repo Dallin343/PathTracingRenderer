@@ -4,30 +4,31 @@
 
 #include "Light.h"
 
-Light::Light(const glm::dvec3 &position, const glm::dvec3 &color) : _position(position), _color(color) {}
+namespace Light {
+    Light(const glm::dvec3 &position, const glm::dvec3 &color, double intensity) : _position(position), _color(color), _intensity(intensity) {}
 
-const glm::dvec3 &Light::getPosition() const {
-    return _position;
-}
-
-void Light::setPosition(const glm::dvec3 &position) {
-    _position = position;
-}
-
-const glm::dvec3 &Light::getColor() const {
-    return _color;
-}
-
-void Light::setColor(const glm::dvec3 &color) {
-    _color = color;
-}
-
-bool Light::inShadow(const Rays::Ray *ray, const Rays::Hit *, const std::vector<std::unique_ptr<BaseRenderable>> &objects) {
-    for (const auto& object : objects) {
-        auto hit = object->intersect(ray);
-        if (hit.has_value() && hit.value()->getObject()->getMaterial()->getType() != Transparent) {
-            return true;
-        }
+    const glm::dvec3 &getPosition() const {
+        return _position;
     }
-    return false;
+
+    void setPosition(const glm::dvec3 &position) {
+        _position = position;
+    }
+
+    const glm::dvec3 &getColor() const {
+        return _color;
+    }
+
+    void setColor(const glm::dvec3 &color) {
+        _color = color;
+    }
+
+    double attenuate(const glm::dvec3& origin, const glm::dvec3& lightPos) const {
+        double d = glm::distance(lightPos, origin);
+        return _intensity / (4 * M_PI * d*d);
+    }
+
+    std::vector<glm::dvec3> getSamplePositions() const {
+        return {_position};
+    }
 }

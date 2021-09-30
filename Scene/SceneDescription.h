@@ -7,9 +7,6 @@
 
 #include "Common.h"
 
-#include <glm/vec3.hpp>
-#include <vector>
-#include <unordered_map>
 #include "Camera.h"
 #include "Renderable/BaseRenderable.h"
 #include "Lights/Light.h"

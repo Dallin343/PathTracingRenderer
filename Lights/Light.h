@@ -5,9 +5,8 @@
 #ifndef CS655_LIGHT_H
 #define CS655_LIGHT_H
 
-#include <glm/vec3.hpp>
-#include <memory>
-#include <vector>
+#include "Common.h"
+
 #include "Renderable/BaseRenderable.h"
 #include "Rays/Ray.h"
 #include "Material/Material.h"
@@ -18,18 +17,10 @@ class Light {
 protected:
     glm::dvec3 _position;
     glm::dvec3 _color;
-
-    virtual double _intensity(const Rays::Ray *) = 0;
+    double _intensity;
 
 public:
-    Light(const glm::dvec3 &position, const glm::dvec3 &color);
-
-    virtual glm::dvec3 calculateDiffuse(const Rays::Ray *, const Rays::Hit *, const Material *,
-                                        const std::vector<std::unique_ptr<BaseRenderable>> &) = 0;
-
-    virtual glm::dvec3 calculateSpecular(const Rays::Ray *, const Rays::Hit *, const Material *,
-                                         const std::vector<std::unique_ptr<BaseRenderable>> &,
-                                         const Camera *) = 0;
+    Light(const glm::dvec3 &position, const glm::dvec3 &color, double intensity);
 
     const glm::dvec3 &getPosition() const;
 
@@ -39,8 +30,9 @@ public:
 
     void setColor(const glm::dvec3 &color);
 
-    virtual bool
-    inShadow(const Rays::Ray *, const Rays::Hit *, const std::vector<std::unique_ptr<BaseRenderable>> &);
+    virtual double attenuate(const glm::dvec3&, const glm::dvec3&) const;
+
+    virtual std::vector<glm::dvec3> getSamplePositions() const; 
 };
 
 

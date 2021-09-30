@@ -8,8 +8,6 @@
 #include "Light.h"
 
 class DirectionalLight : public Light {
-protected:
-    virtual double _intensity(const Rays::Ray *);
 public:
     DirectionalLight(const glm::dvec3 &position, const glm::dvec3 &color);
 
@@ -22,6 +20,8 @@ public:
 
     bool inShadow(const Rays::Ray *ray, const Rays::Hit *hit,
                   const std::vector<std::unique_ptr<BaseRenderable>> &vector) override;
+    
+    double attenuate(const glm::dvec3&, const glm::dvec3&) override { return _intensity; };
 };
 
 
