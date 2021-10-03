@@ -51,6 +51,8 @@ namespace Rays {
         ShadowRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
         ShadowRay() = default;
     };
+
+    
 }
 
 #endif //CS655_RAY_H

@@ -23,12 +23,8 @@ class Renderer {
 private:
     std::optional<std::unique_ptr<Rays::Hit>> _findHit(Rays::Ray *ray);
     glm::dvec3 _traceRay(Rays::Ray* ray, uint8_t depth = 0);
-    glm::dvec3 _calculateIllumination(Rays::Ray* ray, Rays::Hit* hit);
 
-    static std::unique_ptr<Rays::ReflectionRay> _reflect(Rays::Ray* ray, Rays::Hit* hit);
-    static std::unique_ptr<Rays::TransmissionRay> _refract(Rays::Ray* ray, Rays::Hit* hit);
     std::unique_ptr<Rays::Ray> _jitter(Rays::Ray* ray);
-    static double _fresnel(Rays::Ray* ray, Rays::Hit* hit);
     std::vector<glm::dvec3> _getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height, uint32_t sub);
 
 public:

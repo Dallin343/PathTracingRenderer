@@ -2,18 +2,25 @@
 // Created by Dallin Hagman on 9/7/21.
 //
 
+#include "Renderer.h"
 #include <array>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-#include <glm/gtx/vector_angle.hpp>
-#include "Renderer.h"
 #include <thread>
+
+#include "Lights/Lighting.h"
 
 std::string printVec(const glm::dvec3 &vec) {
     std::stringstream stream;
     stream << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
     return stream.str();
+}
+
+
+Renderer::Renderer() = default;
+Renderer::Renderer(std::unique_ptr<SceneDescription> scene) {
+    this->_scene = std::move(scene);
 }
 
 void Renderer::render(std::unique_ptr<SceneDescription> scene, const std::string &outputFile) {
@@ -70,10 +77,10 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
     switch (material->getType()) {
         case Diffuse: {
             PROFILE_SCOPE("Diffuse Tracing");
-            color = _calculateIllumination(ray, hit.get());
+            color = Lighting::calculateIllumination(ray, hit.get(), material, _scene.get());
             if (material->getReflectiveFac() > 0.0) {
                 PROFILE_SCOPE("Reflection");
-                auto reflectionRay = _reflect(ray, hit.get());
+                auto reflectionRay = Lighting::reflect(ray, hit.get());
                 if (material->getGlossyFac() > 0.0) {
                     glm::dvec3 tempColor = {};
                     for (int i = 0; i < NUM_JITTERS; i++) {
@@ -92,7 +99,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
             PROFILE_SCOPE("Transparent Tracing");
             if (material->getReflectiveFac() > 0.0) {
                 PROFILE_SCOPE("Reflection");
-                auto reflectionRay = _reflect(ray, hit.get());
+                auto reflectionRay = Lighting::reflect(ray, hit.get());
                 if (material->getGlossyFac() > 0.0) {
                     glm::dvec3 tempColor = {};
                     for (int i = 0; i < NUM_JITTERS; i++) {
@@ -105,7 +112,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
             }
             if (material->getTransmissionFac() > 0.0) {
                 PROFILE_SCOPE("Transmission");
-                auto transmissionRay = _refract(ray, hit.get());
+                auto transmissionRay = Lighting::refract(ray, hit.get());
                 if (material->getTranslucencyFac() > 0.0) {
                     glm::dvec3 tempColor = {};
                     for (int i = 0; i < NUM_JITTERS; i++) {
@@ -116,7 +123,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
                     transmissionColor += _traceRay(transmissionRay.get(), depth + 1);
                 }
             }
-            double kr = _fresnel(ray, hit.get());
+            double kr = Lighting::fresnel(ray, hit.get());
             color = reflectiveColor * kr + transmissionColor * (1 - kr);
             color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
             break;
@@ -184,87 +191,8 @@ void Renderer::render(const std::string &outputFile) {
 }
 
 
-Renderer::Renderer(std::unique_ptr<SceneDescription> scene) {
-    this->_scene = std::move(scene);
-}
-
-glm::dvec3 Renderer::_calculateIllumination(Rays::Ray *ray, Rays::Hit *hit) {
-    PROFILE_FUNCTION();
-    BaseRenderable *object = hit->getObject();
-    auto material = object->getMaterial();
-    glm::dvec3 color = {0.0, 0.0, 0.0};
-    auto &lights = _scene->getLights();
-
-    for (const auto& light : lights) {
-        if (!light->inShadow(ray, hit, _scene->getObjects())) {
-            glm::dvec3 diffuse = light->calculateDiffuse(ray, hit, material, _scene->getObjects());
-            glm::dvec3 specular = light->calculateSpecular(ray, hit, material, _scene->getObjects(),
-                                                           _scene->getCamera());
-
-            // TEMPORARY
-            color += diffuse + specular;
-        }
-    }
-
-    return color;
-}
-
 std::optional<std::unique_ptr<Rays::Hit>> Renderer::_findHit(Rays::Ray *ray) {
     return _boundingBox->intersect(ray);
-}
-
-std::unique_ptr<Rays::ReflectionRay> Renderer::_reflect(Rays::Ray *ray, Rays::Hit *hit) {
-    double e = 0.00001;
-    auto currentDir = ray->getDirection();
-    auto norm = hit->getNorm();
-    glm::dvec3 reflectionDir = glm::normalize(currentDir - norm * 2.0 * glm::dot(currentDir, norm));
-
-    glm::dvec3 bias = glm::dot(currentDir, norm) < 0.0 ? norm * e : norm * -e;
-    return std::make_unique<Rays::ReflectionRay>(hit->getPoint() + bias, reflectionDir);
-}
-
-std::unique_ptr<Rays::TransmissionRay> Renderer::_refract(Rays::Ray *ray, Rays::Hit *hit) {
-    double e = 1e-8;
-    glm::dvec3 I = ray->getDirection();
-    glm::dvec3 N = hit->getNorm();
-    double ior = hit->getObject()->getMaterial()->getIor();
-
-    double cosi = glm::clamp(glm::dot(I, N), -1.0, 1.0);
-    double n1 = 1.0, n2 = ior;
-    glm::dvec3 n = N;
-    if (cosi < 0) { cosi = -cosi; } else { std::swap(n1, n2); n= -N; }
-    double eta = n1 / n2;
-    double k = 1 - eta * eta * (1 - cosi * cosi);
-    glm::dvec3 refractDir = k < 0.0 ? glm::dvec3() : eta * I + (eta * cosi - glm::sqrt(k)) * n;
-    refractDir = glm::normalize(refractDir);
-
-    bool outside = glm::dot(I, N) < 0;
-    glm::dvec3 bias = e * N;
-    glm::dvec3 origin = outside ? hit->getPoint() - bias : hit->getPoint() + bias;
-    return std::make_unique<Rays::TransmissionRay>(origin, refractDir);
-}
-
-double Renderer::_fresnel(Rays::Ray *ray, Rays::Hit *hit) {
-    glm::dvec3 I = ray->getDirection();
-    glm::dvec3 N = hit->getNorm();
-    double ior = hit->getObject()->getMaterial()->getIor();
-
-    double cosi = glm::clamp(glm::dot(I, N), -1.0, 1.0);
-    double etai = 1, etat = ior;
-    if (cosi > 0) { std::swap(etai, etat); }
-    // Compute sini using Snell's law
-    double sint = etai / etat * glm::sqrt(glm::max(0.0, 1 - cosi * cosi));
-    // Total internal reflection
-    if (sint >= 1) {
-        return 1;
-    }
-    else {
-        double cost = glm::sqrt(glm::max(0.0, 1 - sint * sint));
-        cosi = glm::abs(cosi);
-        double Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
-        double Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
-        return (Rs * Rs + Rp * Rp) / 2.0;
-    }
 }
 
 std::unique_ptr<Rays::Ray> Renderer::_jitter(Rays::Ray *ray) {
@@ -275,5 +203,4 @@ std::unique_ptr<Rays::Ray> Renderer::_jitter(Rays::Ray *ray) {
     return std::make_unique<Rays::Ray>(ray->getOrigin(), glm::normalize(ray->getDirection() + rand));
 }
 
-Renderer::Renderer() = default;
 
