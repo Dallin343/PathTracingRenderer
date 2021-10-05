@@ -22,7 +22,7 @@ antlr_target(SDFParser
         VISITOR)
 
 include_directories(${ANTLR_SDFParser_OUTPUT_DIR})
-include_directories(${CMAKE_SOURCE_DIR} Vendor/glm/glm)
+include_directories(${CMAKE_SOURCE_DIR} Vendor/glm/glm Vendor/stb)
 
 add_subdirectory(Vendor/glm)
 
@@ -62,7 +62,7 @@ add_executable(CS655
         Lights/Lighting.h
         Lights/Lighting.cpp
         Lights/AreaLight.h
-        Lights/AreaLight.cpp)
+        Lights/AreaLight.cpp Vendor/stb/stb_image.h Material/TextureLoader.cpp Material/TextureLoader.h Material/Texture.cpp Material/Texture.h)
 
 
 target_link_libraries(CS655 PRIVATE glm::glm antlr4_shared Threads::Threads)

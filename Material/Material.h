@@ -6,11 +6,13 @@
 #define CS655_MATERIAL_H
 
 #include "Common.h"
+#include "Texture.h"
 
 
 enum MaterialType {
     Diffuse,
-    Transparent
+    Transparent,
+    Tex
 };
 
 class Material {
@@ -19,6 +21,8 @@ private:
     double _diffuseFac{}, _specularFac{}, _reflectiveFac{}, _glossyFac{}, _transmissionFac{}, _translucencyFac{};
     double _phongConst{}, _ior{};
     glm::dvec3 _diffuseColor{}, _specularColor{};
+
+    const std::unique_ptr<Texture>& _texture;
 public:
     Material();
 

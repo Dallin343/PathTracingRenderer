@@ -15,9 +15,14 @@ namespace Rays {
         double _t;
         glm::dvec3 _point;
         glm::dvec3 _norm;
-        BaseRenderable* _object;
+        BaseRenderable *_object;
+
+        glm::dvec2 _texCoords{};
     public:
-        Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm, BaseRenderable* object);
+        Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm, BaseRenderable *object);
+
+        Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm, const glm::dvec2 &texCoords,
+            BaseRenderable *object);
 
         double getT() const;
 
@@ -31,12 +36,15 @@ namespace Rays {
 
         void setNorm(const glm::dvec3 &norm);
 
-        double distanceTo(const glm::dvec3& other);
-        glm::dvec3 vectorTo(const glm::dvec3& other);
+        double distanceTo(const glm::dvec3 &other);
+
+        glm::dvec3 vectorTo(const glm::dvec3 &other);
 
         BaseRenderable *getObject() const;
 
         void setObject(BaseRenderable *object);
+
+        const glm::dvec2 &getTexCoords() const;
     };
 }
 

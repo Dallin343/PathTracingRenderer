@@ -4,47 +4,56 @@
 
 #include "Hit.h"
 
-Rays::Hit::Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm, BaseRenderable *object) : _t(t),
-                                                                                                    _point(point),
-                                                                                                    _norm(norm),
-                                                                                                    _object(object) {}
+namespace Rays {
+    Hit::Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm, BaseRenderable *object) : _t(t),
+                                                                                                  _point(point),
+                                                                                                  _norm(norm),
+                                                                                                  _object(object) {}
 
-double Rays::Hit::getT() const {
-    return _t;
-}
+    Hit::Hit(double t, const glm::dvec3 &point, const glm::dvec3 &norm, const glm::dvec2 &texCoords,
+             BaseRenderable *object) : _t(t), _point(point), _norm(norm), _texCoords(texCoords), _object(object) {}
 
-void Rays::Hit::setT(double t) {
-    _t = t;
-}
+    double Hit::getT() const {
+        return _t;
+    }
 
-const glm::dvec3 &Rays::Hit::getPoint() const {
-    return _point;
-}
+    void Hit::setT(double t) {
+        _t = t;
+    }
 
-void Rays::Hit::setPoint(const glm::dvec3 &point) {
-    _point = point;
-}
+    const glm::dvec3 &Hit::getPoint() const {
+        return _point;
+    }
 
-const glm::dvec3 &Rays::Hit::getNorm() const {
-    return _norm;
-}
+    void Hit::setPoint(const glm::dvec3 &point) {
+        _point = point;
+    }
 
-void Rays::Hit::setNorm(const glm::dvec3 &norm) {
-    _norm = norm;
-}
+    const glm::dvec3 &Hit::getNorm() const {
+        return _norm;
+    }
 
-double Rays::Hit::distanceTo(const glm::dvec3 &other) {
-    return glm::distance(_point, other);
-}
+    void Hit::setNorm(const glm::dvec3 &norm) {
+        _norm = norm;
+    }
 
-glm::dvec3 Rays::Hit::vectorTo(const glm::dvec3 &other) {
-    return glm::normalize(other - _point);
-}
+    double Hit::distanceTo(const glm::dvec3 &other) {
+        return glm::distance(_point, other);
+    }
 
-BaseRenderable *Rays::Hit::getObject() const {
-    return _object;
-}
+    glm::dvec3 Hit::vectorTo(const glm::dvec3 &other) {
+        return glm::normalize(other - _point);
+    }
 
-void Rays::Hit::setObject(BaseRenderable *object) {
-    _object = object;
+    BaseRenderable *Hit::getObject() const {
+        return _object;
+    }
+
+    void Hit::setObject(BaseRenderable *object) {
+        _object = object;
+    }
+
+    const glm::dvec2 &Hit::getTexCoords() const {
+        return _texCoords;
+    }
 }
