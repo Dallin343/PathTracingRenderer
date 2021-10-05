@@ -1,8 +1,17 @@
 BACKGROUND Color 0.2 0.2 0.2
 AMBIENT AmbientFactor 0.1 Color 0.5 0.5 0.5
-DIRECTIONAL_LIGHT Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0
-POINT_LIGHT Origin -4.0 -4.0 2.0 Color 1.0 1.0 1.0
-POINT_LIGHT Origin -4.0 0.0 0.0 Color 0.8 0.6 0.2
+##-
+AREA_LIGHT
+    Origin -3.0 -1.0 -3.0
+    U 0.0 1.0 0.0
+    V -1.0 0.0 0.0
+    Width 2.0
+    Height 2.0
+    Color 1.0 1.0 1.0
+    Intensity 1.0
+#-#
+#POINT_LIGHT Origin 0.0 0.0 -3.0 Color 1.0 1.0 1.0 Intensity 10.0
+
 MATERIAL
     Index 1
     Type Diffuse
@@ -11,12 +20,27 @@ MATERIAL
     PhongConstant 2.0
     DiffuseFactor 1.0
     SpecularFactor 0.0
-    ReflectiveFactor 0.5
+    ReflectiveFactor 0.0
+    GlossyFactor 0.0
 
+MATERIAL
+    Index 2
+    Type Diffuse
+    DiffuseColor 0.0 1.0 0.0
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 2.0
+    DiffuseFactor 1.0
+    SpecularFactor 0.0
+    ReflectiveFactor 0.0
+    GlossyFactor 0.0
+
+#Floor
 TRIANGLE
     MaterialNumber 1
-    Point1 -100.0 -100.0 0.0
-    Point2 0.0 100.0 0.0
-    Point3 100.0 -100.0 0.0
+    Point1 1.0 100.0 5.0
+    Point2 -1.0 0.0 -50.0
+    Point3 1.0 -100.0 5.0
+
+SPHERE MaterialNumber 2 Origin 0.0 0.4 2.5 Radius 1.0
 
 CAMERA LookFrom 0.0 0.0 5.0 LookAt 0.0 0.0 0.0 FieldOfView 90.0 90.0

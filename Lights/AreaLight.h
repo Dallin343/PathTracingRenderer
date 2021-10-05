@@ -12,5 +12,7 @@ private:
     double _width, _height;
 public:
     AreaLight(const glm::dvec3&, const glm::dvec3&, const glm::dvec3&, double, double, const glm::dvec3&, double);
-    virtual std::vector<glm::dvec3> getSamplePositions() const override;
+    std::vector<glm::dvec3> getSamplePositions() const override;
+
+    Type getType() const override { return Type::Area; }
 };

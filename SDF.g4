@@ -20,10 +20,13 @@ attribute: background
 background: 'BACKGROUND' 'Color' rgb;
 ambient: 'AMBIENT' 'AmbientFactor' fac=Float 'Color' rgb;
 camera: 'CAMERA' 'LookFrom' lf=point3 'LookAt' la=point3 'FieldOfView' fov=point2;
-directionalLight: 'DIRECTIONAL_LIGHT' 'Direction' point3 'Color' rgb;
-areaLight: 'AREA_LIGHT' 'p1' p1=point3 'p2' p2=point3 'Color' rgb;
-pointLight: 'POINT_LIGHT' 'Origin' point3 'Color' rgb;
-sphereLight: 'SPHERE_LIGHT' 'Origin' point3 'Radius' radius=Float 'Color' rgb;
+directionalLight: 'DIRECTIONAL_LIGHT' 'Direction' point3 'Color' rgb 'Intensity' intensity=Float;
+areaLight: 'AREA_LIGHT'
+    'Origin' origin=point3 'U' u=point3 'V' v=point3
+    'Width' w=Float 'Height' h=Float 'Color' rgb 'Intensity' intensity=Float;
+
+pointLight: 'POINT_LIGHT' 'Origin' point3 'Color' rgb 'Intensity' intensity=Float;
+sphereLight: 'SPHERE_LIGHT' 'Origin' point3 'Radius' radius=Float 'Color' rgb 'Intensity' intensity=Float;
 material: 'MATERIAL'
     'Index' num=Int
     'Type' (

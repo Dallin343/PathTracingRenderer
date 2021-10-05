@@ -3,13 +3,8 @@
 //
 
 #include "Renderer.h"
-#include <array>
-#include <algorithm>
-#include <fstream>
 #include <sstream>
 #include <thread>
-
-#include "Lights/Lighting.h"
 
 std::string printVec(const glm::dvec3 &vec) {
     std::stringstream stream;
@@ -48,8 +43,8 @@ std::vector<glm::dvec3> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, u
         double currI = uStart + iSubStep * stepI;
         for (int stepJ = 0; stepJ < sub; stepJ++) {
             double currJ = vStart + jSubStep * stepJ;
-             double iJitter = _random(_randomEngine) * iSubStep;
-             double jJitter = _random(_randomEngine) * jSubStep;
+             double iJitter = Renderer::_random() * iSubStep;
+             double jJitter = Renderer::_random() * jSubStep;
             subPixels.emplace_back(currI + iJitter, currJ + jJitter, 0.0);
         }
     }
@@ -196,9 +191,9 @@ std::optional<std::unique_ptr<Rays::Hit>> Renderer::_findHit(Rays::Ray *ray) {
 }
 
 std::unique_ptr<Rays::Ray> Renderer::_jitter(Rays::Ray *ray) {
-    auto x = _random(_randomEngine) * JITTER_BIAS;
-    auto y = _random(_randomEngine) * JITTER_BIAS;
-    auto z = _random(_randomEngine) * JITTER_BIAS;
+    auto x = Renderer::_random() * JITTER_BIAS;
+    auto y = Renderer::_random() * JITTER_BIAS;
+    auto z = Renderer::_random() * JITTER_BIAS;
     glm::dvec3 rand = {x, y, z};
     return std::make_unique<Rays::Ray>(ray->getOrigin(), glm::normalize(ray->getDirection() + rand));
 }

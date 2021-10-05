@@ -6,15 +6,23 @@
 #define CS655_COMMON_H
 
 #include <glm.hpp>
+#include <algorithm>
 #include <memory>
 #include <vector>
 #include <unordered_map>
 #include <optional>
 #include <Debug/Instrumentor.h>
 
-const double BIAS = 1e-6;
-const int NUM_SHADOW_SAMPLES = 6;
+const uint8_t MAX_DEPTH = 4;
+const int NUM_JITTERS = 8;
+const double JITTER_BIAS = 0.1;
+const int NUM_THREADS = 12;
+const uint32_t SUB_PIXELS = 2;
+const int WIDTH = 480;
+const int HEIGHT = 480;
 
+const double BIAS = 1e-6;
+const int NUM_SHADOW_SAMPLES = 20;
 
 class Bounds {
 public:
