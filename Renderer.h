@@ -6,20 +6,17 @@
 #define CS655_RENDERER_H
 
 #include "Common.h"
-#include "Scene/SceneDescription.h"
-#include <Scene/BoundingBox.h>
-#include <array>
 #include <random>
 
-const uint8_t MAX_DEPTH = 4;
-const int NUM_JITTERS = 4;
-const double JITTER_BIAS = 0.1;
-const int NUM_THREADS = 12;
-const uint32_t SUB_PIXELS = 4;
-const int WIDTH = 480;
-const int HEIGHT = 480;
+#include "Scene/SceneDescription.h"
+#include "Lights/Lighting.h"
+#include "Scene/BoundingBox.h"
+
 
 class Renderer {
+    inline static std::uniform_real_distribution<double> _distro{0.0, 1.0};
+    inline static std::default_random_engine _engine;
+    inline static auto _random = std::bind(_distro, _engine);
 private:
     std::optional<std::unique_ptr<Rays::Hit>> _findHit(Rays::Ray *ray);
     glm::dvec3 _traceRay(Rays::Ray* ray, uint8_t depth = 0);
@@ -37,8 +34,6 @@ public:
 private:
     std::unique_ptr<SceneDescription> _scene;
     std::unique_ptr<BoundingBox> _boundingBox;
-    std::uniform_real_distribution<double> _random{0.0, 1.0};
-    std::default_random_engine _randomEngine;
 };
 
 

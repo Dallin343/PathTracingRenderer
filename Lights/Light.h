@@ -13,6 +13,10 @@
 #include "Scene/Camera.h"
 #include "Rays/Hit.h"
 
+enum Type {
+    Base, Directional, Point, Area
+};
+
 class Light {
 protected:
     glm::dvec3 _position;
@@ -32,7 +36,9 @@ public:
 
     virtual double attenuate(const glm::dvec3&, const glm::dvec3&) const;
 
-    virtual std::vector<glm::dvec3> getSamplePositions() const; 
+    virtual std::vector<glm::dvec3> getSamplePositions() const;
+
+    virtual Type getType() const { return Type::Base; }
 };
 
 

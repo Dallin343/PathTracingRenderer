@@ -6,6 +6,7 @@
 #include <Renderable/Sphere.h>
 #include <Lights/PointLight.h>
 #include <Renderable/Triangle.h>
+#include <Lights/AreaLight.h>
 #include "MySDFVisitor.h"
 
 antlrcpp::Any MySDFVisitor::visitScene(antlrcpp::SDFParser::SceneContext *ctx) {
@@ -43,19 +44,31 @@ antlrcpp::Any MySDFVisitor::visitCamera(antlrcpp::SDFParser::CameraContext *ctx)
 antlrcpp::Any MySDFVisitor::visitDirectionalLight(antlrcpp::SDFParser::DirectionalLightContext *ctx) {
     glm::dvec3 color = visitRgb(ctx->rgb());
     glm::dvec3 dir = visitPoint3(ctx->point3());
-    std::unique_ptr<Light> light = std::make_unique<DirectionalLight>(glm::normalize(dir), color);
+    double intensity = std::stod(ctx->intensity->getText());
+    std::unique_ptr<Light> light = std::make_unique<DirectionalLight>(glm::normalize(dir), color, intensity);
     _sceneDescription->pushLight(std::move(light));
+
     return light;
 }
 
 antlrcpp::Any MySDFVisitor::visitAreaLight(antlrcpp::SDFParser::AreaLightContext *ctx) {
-    return SDFBaseVisitor::visitAreaLight(ctx);
+    glm::dvec3 origin = visitPoint3(ctx->origin);
+    glm::dvec3 u = visitPoint3(ctx->u);
+    glm::dvec3 v = visitPoint3(ctx->v);
+    double width = std::stod(ctx->w->getText());
+    double height = std::stod(ctx->h->getText());
+    glm::dvec3 color = visitRgb(ctx->rgb());
+    double intensity = std::stod(ctx->intensity->getText());
+    std::unique_ptr<Light> light = std::make_unique<AreaLight>(origin, u, v, width, height, color, intensity);
+    _sceneDescription->pushLight(std::move(light));
+    return light;
 }
 
 antlrcpp::Any MySDFVisitor::visitPointLight(antlrcpp::SDFParser::PointLightContext *ctx) {
     glm::dvec3 color = visitRgb(ctx->rgb());
     glm::dvec3 origin = visitPoint3(ctx->point3());
-    std::unique_ptr<Light> light = std::make_unique<PointLight>(origin, color);
+    double intensity = std::stod(ctx->intensity->getText());
+    std::unique_ptr<Light> light = std::make_unique<PointLight>(origin, color, intensity);
     _sceneDescription->pushLight(std::move(light));
     return light;
 }
