@@ -7,6 +7,7 @@
 #include <Lights/PointLight.h>
 #include <Renderable/Triangle.h>
 #include <Lights/AreaLight.h>
+#include "Material/TextureLoader.h"
 #include "MySDFVisitor.h"
 
 antlrcpp::Any MySDFVisitor::visitScene(antlrcpp::SDFParser::SceneContext *ctx) {
@@ -98,13 +99,30 @@ antlrcpp::Any MySDFVisitor::visitMaterial(antlrcpp::SDFParser::MaterialContext *
         double ior = std::stod(ctx->ior->getText());
         auto mat = std::make_unique<Material>(kr, kg, kt, ktrans, ior);
         _sceneDescription->insertMaterial(num, std::move(mat));
+    } else if (type == "Textured") {
+        int texNum = std::stoi(ctx->tex_num->getText());
+        auto& tex = _sceneDescription->getTextures().at(texNum);
+        auto mat = std::make_unique<Material>(tex.get());
+        _sceneDescription->insertMaterial(num, std::move(mat));
     }
 
     return num;
 }
 
+antlrcpp::Any MySDFVisitor::visitTexture(antlrcpp::SDFParser::TextureContext *ctx) {
+    int texNum = std::stoi(ctx->tex_num->getText());
+    std::string filePath = ctx->file->getText();
+
+    std::unique_ptr<Texture> texture = TextureLoader::loadFromFile(filePath);
+    _sceneDescription->insertTexture(texNum, std::move(texture));
+
+    return texture;
+}
+
 antlrcpp::Any MySDFVisitor::visitSphere(antlrcpp::SDFParser::SphereContext *ctx) {
-    glm::dvec3 origin = visitPoint3(ctx->origin());
+    glm::dvec3 origin = visitPoint3(ctx->origin);
+    glm::dvec3 up = visitPoint3(ctx->up);
+    glm::dvec3 right = visitPoint3(ctx->right);
     double radius = std::stod(ctx->radius->getText());
     int mat_num = std::stoi(ctx->mat_num->getText());
 
@@ -176,4 +194,3 @@ std::unique_ptr<SceneDescription> MySDFVisitor::takeSceneDescription() {
 }
 
 MySDFVisitor::MySDFVisitor(): _sceneDescription(std::make_unique<SceneDescription>()) {}
-

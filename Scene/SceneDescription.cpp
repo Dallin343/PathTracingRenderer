@@ -71,3 +71,11 @@ void SceneDescription::insertMaterial(int num, std::unique_ptr<Material> materia
 const std::unordered_map<int, std::unique_ptr<Material>> &SceneDescription::getMaterials() const {
     return _materials;
 }
+
+const std::unordered_map<int, std::unique_ptr<Texture>> &SceneDescription::getTextures() const {
+    return _textures;
+}
+
+void SceneDescription::insertTexture(int num, std::unique_ptr<Texture> texture) {
+    _textures.insert(std::make_pair(num, std::move(texture)));
+}

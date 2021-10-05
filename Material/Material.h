@@ -22,7 +22,7 @@ private:
     double _phongConst{}, _ior{};
     glm::dvec3 _diffuseColor{}, _specularColor{};
 
-    std::shared_ptr<Texture> _texture;
+    const Texture* _texture;
 public:
     Material();
 
@@ -31,7 +31,7 @@ public:
 
     Material(double reflectiveFac, double glossy, double transmissionFac, double translucency, double ior);
 
-    Material(std::shared_ptr<Texture> texture);
+    Material(const Texture* texture);
 
     double getDiffuseFac() const;
 

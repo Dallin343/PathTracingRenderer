@@ -19,6 +19,7 @@ private:
     std::vector<std::unique_ptr<BaseRenderable>> _objects;
     std::vector<std::unique_ptr<Light>> _lights;
     std::unordered_map<int, std::unique_ptr<Material>> _materials;
+    std::unordered_map<int, std::unique_ptr<Texture>> _textures;
 public:
     SceneDescription();
 
@@ -50,6 +51,10 @@ public:
     const std::unordered_map<int, std::unique_ptr<Material>> &getMaterials() const;
 
     void insertMaterial(int num, std::unique_ptr<Material> material);
+
+    const std::unordered_map<int, std::unique_ptr<Texture>> &getTextures() const;
+
+    void insertTexture(int num, std::unique_ptr<Texture> texture);
 };
 
 

@@ -36,6 +36,8 @@ public:
 
     antlrcpp::Any visitMaterial(antlrcpp::SDFParser::MaterialContext *ctx) override;
 
+    antlrcpp::Any visitTexture(antlrcpp::SDFParser::TextureContext *ctx) override;
+
     antlrcpp::Any visitSphere(antlrcpp::SDFParser::SphereContext *ctx) override;
 
     antlrcpp::Any visitTriangle(antlrcpp::SDFParser::TriangleContext *ctx) override;
