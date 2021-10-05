@@ -104,7 +104,7 @@ antlrcpp::Any MySDFVisitor::visitMaterial(antlrcpp::SDFParser::MaterialContext *
 }
 
 antlrcpp::Any MySDFVisitor::visitSphere(antlrcpp::SDFParser::SphereContext *ctx) {
-    glm::dvec3 origin = visitPoint3(ctx->point3());
+    glm::dvec3 origin = visitPoint3(ctx->origin());
     double radius = std::stod(ctx->radius->getText());
     int mat_num = std::stoi(ctx->mat_num->getText());
 
@@ -128,10 +128,6 @@ antlrcpp::Any MySDFVisitor::visitTriangle(antlrcpp::SDFParser::TriangleContext *
 
 antlrcpp::Any MySDFVisitor::visitPolygon(antlrcpp::SDFParser::PolygonContext *ctx) {
     return SDFBaseVisitor::visitPolygon(ctx);
-}
-
-antlrcpp::Any MySDFVisitor::visitTexSphere(antlrcpp::SDFParser::TexSphereContext *ctx) {
-    return SDFBaseVisitor::visitTexSphere(ctx);
 }
 
 antlrcpp::Any MySDFVisitor::visitTexTriangle(antlrcpp::SDFParser::TexTriangleContext *ctx) {

@@ -12,7 +12,7 @@
 #include "Texture.h"
 
 namespace TextureLoader {
-    std::unique_ptr<Texture> loadFromFile(const std::string& path);
+    std::shared_ptr<Texture> loadFromFile(const std::string& path);
 };
 
 

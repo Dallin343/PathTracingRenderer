@@ -42,8 +42,6 @@ public:
 
     antlrcpp::Any visitPolygon(antlrcpp::SDFParser::PolygonContext *ctx) override;
 
-    antlrcpp::Any visitTexSphere(antlrcpp::SDFParser::TexSphereContext *ctx) override;
-
     antlrcpp::Any visitTexTriangle(antlrcpp::SDFParser::TexTriangleContext *ctx) override;
 
     antlrcpp::Any visitTexPolygon(antlrcpp::SDFParser::TexPolygonContext *ctx) override;

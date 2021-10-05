@@ -21,6 +21,8 @@ Material::Material(double reflectiveFac, double glossy, double transmissionFac, 
 
 }
 
+Material::Material(std::shared_ptr<Texture> texture): _type(Textured), _texture(texture) {}
+
 double Material::getDiffuseFac() const {
     return _diffuseFac;
 }
@@ -64,5 +66,3 @@ double Material::getGlossyFac() const {
 double Material::getTranslucencyFac() const {
     return _translucencyFac;
 }
-
-

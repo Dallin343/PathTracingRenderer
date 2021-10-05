@@ -12,7 +12,7 @@
 enum MaterialType {
     Diffuse,
     Transparent,
-    Tex
+    Textured
 };
 
 class Material {
@@ -22,7 +22,7 @@ private:
     double _phongConst{}, _ior{};
     glm::dvec3 _diffuseColor{}, _specularColor{};
 
-    const std::unique_ptr<Texture>& _texture;
+    std::shared_ptr<Texture> _texture;
 public:
     Material();
 
@@ -30,6 +30,8 @@ public:
              const glm::dvec3 &diffuseColor, const glm::dvec3 &specularColor);
 
     Material(double reflectiveFac, double glossy, double transmissionFac, double translucency, double ior);
+
+    Material(std::shared_ptr<Texture> texture);
 
     double getDiffuseFac() const;
 
