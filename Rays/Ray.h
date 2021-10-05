@@ -6,16 +6,16 @@
 #define CS655_RAY_H
 
 #include "Common.h"
-#include <glm/vec3.hpp>
 
 namespace Rays {
 
     class Ray {
     protected:
-        glm::dvec3 _origin;
-        glm::dvec3 _direction;
+        glm::dvec3 _origin{};
+        glm::dvec3 _direction{};
     public:
         Ray(const glm::dvec3 &origin, const glm::dvec3 &direction);
+        Ray() = default;
 
         const glm::dvec3 &getOrigin() const;
 
@@ -29,23 +29,30 @@ namespace Rays {
     class CameraRay: public Ray {
     public:
         CameraRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
+        CameraRay() = default;
     };
     class IlluminationRay: public Ray {
     public:
         IlluminationRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
+        IlluminationRay() = default;
     };
     class ReflectionRay: public Ray {
     public:
         ReflectionRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
+        ReflectionRay() = default;
     };
     class TransmissionRay: public Ray {
     public:
         TransmissionRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
+        TransmissionRay() = default;
     };
     class ShadowRay: public Ray {
     public:
         ShadowRay(const glm::dvec3 &origin, const glm::dvec3 &direction): Ray(origin, direction) {}
+        ShadowRay() = default;
     };
+
+    
 }
 
 #endif //CS655_RAY_H

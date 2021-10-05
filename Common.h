@@ -6,6 +6,14 @@
 #define CS655_COMMON_H
 
 #include <glm.hpp>
+#include <memory>
+#include <vector>
+#include <unordered_map>
+#include <optional>
+#include <Debug/Instrumentor.h>
+
+const double BIAS = 1e-6;
+const int NUM_SHADOW_SAMPLES = 6;
 
 
 class Bounds {
@@ -13,9 +21,11 @@ public:
     glm::dvec3 min, max;
 
     bool operator^(const Bounds &other) const {
-        bool minInside = glm::any(glm::greaterThanEqual(min, other.min)) && glm::any(glm::lessThanEqual(min, other.max));
-        bool maxInside = glm::any(glm::greaterThanEqual(max, other.min)) && glm::any(glm::lessThanEqual(max, other.max));
-        return minInside || maxInside;
+        return
+            (((min.x <= other.min.x && other.min.x <= max.x) || (other.min.x <= min.x && min.x <= other.max.x)) &&
+            ((min.y <= other.min.y && other.min.y <= max.y) || (other.min.y <= min.y && min.y <= other.max.y)) &&
+            ((min.z <= other.min.z && other.min.z <= max.z) || (other.min.z <= min.z && min.z <= other.max.z))) ||
+            (glm::all(glm::greaterThanEqual(min, other.min)) && glm::all(glm::lessThanEqual(max, other.max)));
     }
 
     glm::bvec3 operator>(const Bounds &other) const {

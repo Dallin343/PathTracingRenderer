@@ -9,11 +9,12 @@ Triangle::Triangle(const std::unique_ptr<Material> &material, glm::dvec3 p1, glm
         : BaseRenderable(material), _p1(p1), _p2(p2), _p3(p3) {
 
     const double e = 0.1;
-    _bounds.min = {std::min({_p1.x, _p2.x, _p3.x})-e, std::min({_p1.y, _p2.y, _p3.y})-e,std::min({_p1.z, _p2.z, _p3.z})-e};
-    _bounds.max = {std::max({_p1.x, _p2.x, _p3.x})+e, std::max({_p1.y, _p2.y, _p3.y})+e,std::max({_p1.z, _p2.z, _p3.z})+e};
+    _bounds.min = {std::min({_p1.x, _p2.x, _p3.x}), std::min({_p1.y, _p2.y, _p3.y}),std::min({_p1.z, _p2.z, _p3.z})};
+    _bounds.max = {std::max({_p1.x, _p2.x, _p3.x}), std::max({_p1.y, _p2.y, _p3.y}),std::max({_p1.z, _p2.z, _p3.z})};
 }
 
 std::optional<std::unique_ptr<Rays::Hit>> Triangle::intersect(const Rays::Ray *ray) {
+    PROFILE_FUNCTION();
     double e = 0.000001;
     glm::dvec3 w0 = ray->getOrigin() - _p2;
     double num = -(glm::dot(_calcNormal(), w0));

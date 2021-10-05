@@ -5,7 +5,7 @@
 #ifndef CS655_CAMERA_H
 #define CS655_CAMERA_H
 
-#include <glm.hpp>
+#include "Common.h"
 
 class Camera {
 private:

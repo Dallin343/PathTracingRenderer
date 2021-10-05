@@ -11,6 +11,8 @@ include(ExternalAntlr4Cpp)
 # add antrl4cpp artifacts to project environment
 include_directories(${ANTLR4_INCLUDE_DIRS})
 
+find_package(Threads REQUIRED)
+
 set(ANTLR_EXECUTABLE ${PROJECT_SOURCE_DIR}/Vendor/antlr/antlr-4.9.2-complete.jar)
 find_package(ANTLR REQUIRED)
 # Call macro to add lexer and grammar to your build dependencies.
@@ -26,6 +28,7 @@ add_subdirectory(Vendor/glm)
 
 add_executable(CS655
         ${ANTLR_SDFParser_CXX_OUTPUTS}
+        Debug/Instrumentor.h
         main.cpp
         Material/Material.cpp
         Rays/Ray.cpp
@@ -41,7 +44,25 @@ add_executable(CS655
         Lights/DirectionalLight.cpp
         Lights/DirectionalLight.h
         Parser/MySDFVisitor.cpp
-        Parser/MySDFVisitor.h Parser/MySDFParser.cpp Parser/MySDFParser.h Renderer.cpp Renderer.h Renderable/Polygon.cpp Renderable/Polygon.h Renderable/Triangle.cpp Renderable/Triangle.h Lights/PointLight.cpp Lights/PointLight.h Renderable/Plane.cpp Renderable/Plane.h Scene/BoundingBox.cpp Scene/BoundingBox.h)
+        Parser/MySDFVisitor.h 
+        Parser/MySDFParser.cpp 
+        Parser/MySDFParser.h 
+        Renderer.cpp 
+        Renderer.h 
+        Renderable/Polygon.cpp 
+        Renderable/Polygon.h 
+        Renderable/Triangle.cpp 
+        Renderable/Triangle.h 
+        Lights/PointLight.cpp 
+        Lights/PointLight.h 
+        Renderable/Plane.cpp 
+        Renderable/Plane.h 
+        Scene/BoundingBox.cpp 
+        Scene/BoundingBox.h
+        Lights/Lighting.h
+        Lights/Lighting.cpp
+        Lights/AreaLight.h
+        Lights/AreaLight.cpp)
 
 
-target_link_libraries(CS655 PRIVATE glm::glm antlr4_shared)
+target_link_libraries(CS655 PRIVATE glm::glm antlr4_shared Threads::Threads)

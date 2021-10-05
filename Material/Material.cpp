@@ -2,18 +2,22 @@
 
 Material::Material() = default;
 
-Material::Material(double diffuseFac, double specularFac, double reflectiveFac, double phongConst,
+Material::Material(double diffuseFac, double specularFac, double reflectiveFac, double glossy, double phongConst,
                    const glm::dvec3 &diffuseColor,
                    const glm::dvec3 &specularColor) : _type(Diffuse), _diffuseFac(diffuseFac),
                                                       _specularFac(specularFac),
                                                       _reflectiveFac(reflectiveFac),
+                                                      _glossyFac(glossy),
                                                       _phongConst(phongConst),
                                                       _diffuseColor(diffuseColor),
                                                       _specularColor(specularColor) {}
 
-Material::Material(double reflectiveFac, double transmissionFac, double ior) : _type(Transparent),
-                                                                               _reflectiveFac(reflectiveFac),
-                                                                               _transmissionFac(transmissionFac), _ior(ior) {
+Material::Material(double reflectiveFac, double glossy, double transmissionFac, double translucency, double ior)
+        : _type(Transparent),
+          _reflectiveFac(reflectiveFac),
+          _glossyFac(glossy),
+          _translucencyFac(translucency),
+          _transmissionFac(transmissionFac), _ior(ior) {
 
 }
 
@@ -51,6 +55,14 @@ double Material::getReflectiveFac() const {
 
 MaterialType Material::getType() const {
     return _type;
+}
+
+double Material::getGlossyFac() const {
+    return _glossyFac;
+}
+
+double Material::getTranslucencyFac() const {
+    return _translucencyFac;
 }
 
 

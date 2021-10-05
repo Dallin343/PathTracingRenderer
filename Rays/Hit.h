@@ -6,6 +6,7 @@
 #define CS655_HIT_H
 
 #include "Common.h"
+
 class BaseRenderable;
 
 namespace Rays {

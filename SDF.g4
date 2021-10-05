@@ -34,20 +34,15 @@ material: 'MATERIAL'
         'DiffuseFactor' kd=Float
         'SpecularFactor' ks=Float
         'ReflectiveFactor' kr=Float
+        'GlossyFactor' kg=Float
         |
     type='Transparent'
         'ReflectiveFactor' kr=Float
+        'GlossyFactor' kg=Float
         'TransmissionFactor' kt=Float
+        'TranslucencyFactor' ktrans=Float
         'IndexOfRefraction' ior=Float
     );
-//    'DiffuseColor' kd_rgb=rgb
-//    'SpecularColor' ks_rgb=rgb
-//    'PhongConstant' n=Float
-//    'DiffuseFactor' kd=Float
-//    'SpecularFactor' ks=Float
-//    'ReflectiveFactor' kr=Float
-//    'TransmissionFactor' kt=Float
-//    'IndexOfRefraction' ior=Float;
 
 sphere: 'SPHERE' 'MaterialNumber' mat_num=Int 'Origin' point3 'Radius' radius=Float;
 triangle: 'TRIANGLE' 'MaterialNumber' mat_num=Int 'Point1' p1=point3 'Point2' p2=point3 'Point3' p3=point3;//vertex+;

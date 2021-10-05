@@ -6,7 +6,6 @@
 #define CS655_POLYGON_H
 
 
-#include <vector>
 #include "Plane.h"
 
 class Polygon: public Plane {

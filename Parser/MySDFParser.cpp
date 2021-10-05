@@ -10,6 +10,7 @@
 
 using namespace antlr4;
 std::unique_ptr<SceneDescription> MySDFParser::parse(std::ifstream& src) {
+    PROFILE_FUNCTION();
     ANTLRInputStream input(src);
     antlrcpp::SDFLexer lexer(&input);
     CommonTokenStream tokens(&lexer);

@@ -5,9 +5,8 @@
 #ifndef CS655_SCENEDESCRIPTION_H
 #define CS655_SCENEDESCRIPTION_H
 
-#include <glm/vec3.hpp>
-#include <vector>
-#include <unordered_map>
+#include "Common.h"
+
 #include "Camera.h"
 #include "Renderable/BaseRenderable.h"
 #include "Lights/Light.h"

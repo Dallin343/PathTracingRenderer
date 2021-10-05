@@ -6,6 +6,7 @@
 #include <glm.hpp>
 
 std::optional<std::unique_ptr<Rays::Hit>> Sphere::intersect(const Rays::Ray* ray) {
+    PROFILE_FUNCTION();
     glm::dvec3 oc = _origin - ray->getOrigin();
     double tca = glm::dot(oc, ray->getDirection());
 

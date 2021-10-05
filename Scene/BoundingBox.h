@@ -6,7 +6,7 @@
 #define CS655_BOUNDINGBOX_H
 
 #include "Common.h"
-#include <vector>
+
 #include <Renderable/BaseRenderable.h>
 #include "Rays/Ray.h"
 #include "Rays/Hit.h"
