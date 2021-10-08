@@ -14,6 +14,7 @@ namespace TextureLoader {
         texture.reserve(width);
 
         for (int x = 0; x < width; x++) {
+            texture.emplace_back();
             texture.at(x).reserve(height);
             for (int y = 0; y < height; y++) {
                 auto index = (height * num_channels) * y + (x * 3);
@@ -22,7 +23,7 @@ namespace TextureLoader {
         }
         stbi_image_free(data);
 
-        return std::make_unique<Texture>(texture);
+        return std::make_unique<Texture>(texture, width, height);
     }
 }
 

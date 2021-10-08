@@ -5,6 +5,7 @@
 #include "Scene/BoundingBox.h"
 #include "Common.h"
 
+
 int main(int argc, const char* argv[]) {
     if (argc != 3) {
         std::cerr << "Need 2 arguments." << std::endl;

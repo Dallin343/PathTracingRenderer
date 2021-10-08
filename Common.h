@@ -16,8 +16,8 @@
 const uint8_t MAX_DEPTH = 4;
 const int NUM_JITTERS = 8;
 const double JITTER_BIAS = 0.1;
-const int NUM_THREADS = 12;
-const uint32_t SUB_PIXELS = 2;
+const int NUM_THREADS = 2;
+const uint32_t SUB_PIXELS = 4;
 const int WIDTH = 480;
 const int HEIGHT = 480;
 

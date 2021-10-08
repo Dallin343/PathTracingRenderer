@@ -62,7 +62,13 @@ add_executable(CS655
         Lights/Lighting.h
         Lights/Lighting.cpp
         Lights/AreaLight.h
-        Lights/AreaLight.cpp Vendor/stb/stb_image.h Material/TextureLoader.cpp Material/TextureLoader.h Material/Texture.cpp Material/Texture.h)
+        Lights/AreaLight.cpp
+        Vendor/stb/stb_image.h
+        Vendor/stb/stb_image.cpp
+        Material/TextureLoader.cpp
+        Material/TextureLoader.h
+        Material/Texture.cpp
+        Material/Texture.h)
 
 
 target_link_libraries(CS655 PRIVATE glm::glm antlr4_shared Threads::Threads)

@@ -6,7 +6,8 @@
 #include <sstream>
 #include <thread>
 
-std::string printVec(const glm::dvec3 &vec) {
+std::string printVec(const glm::dvec3 &vec)
+{
     std::stringstream stream;
     stream << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
     return stream.str();
@@ -14,24 +15,29 @@ std::string printVec(const glm::dvec3 &vec) {
 
 
 Renderer::Renderer() = default;
-Renderer::Renderer(std::unique_ptr<SceneDescription> scene) {
+
+Renderer::Renderer(std::unique_ptr<SceneDescription> scene)
+{
     this->_scene = std::move(scene);
 }
 
-void Renderer::render(std::unique_ptr<SceneDescription> scene, const std::string &outputFile) {
+void Renderer::render(std::unique_ptr<SceneDescription> scene, const std::string &outputFile)
+{
     PROFILE_FUNCTION();
     _scene = std::move(scene);
     render(outputFile);
 }
 
-std::vector<glm::dvec3> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height, uint32_t sub) {
+std::vector<glm::dvec3>
+Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height, uint32_t sub)
+{
     PROFILE_FUNCTION();
     glm::dvec2 viewport = _scene->getCamera()->getViewportSize();
     double iStep = (viewport.x * 2.0) / width;
     double jStep = (viewport.y * 2.0) / height;
 
-    double iSubStep = iStep / (double)sub;
-    double jSubStep = jStep / (double)sub;
+    double iSubStep = iStep / (double) sub;
+    double jSubStep = jStep / (double) sub;
 
     double uStart = i * iStep - viewport.x;
     double vStart = j * jStep - viewport.y;
@@ -43,15 +49,16 @@ std::vector<glm::dvec3> Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, u
         double currI = uStart + iSubStep * stepI;
         for (int stepJ = 0; stepJ < sub; stepJ++) {
             double currJ = vStart + jSubStep * stepJ;
-             double iJitter = Renderer::_random() * iSubStep;
-             double jJitter = Renderer::_random() * jSubStep;
+            double iJitter = Renderer::_random() * iSubStep;
+            double jJitter = Renderer::_random() * jSubStep;
             subPixels.emplace_back(currI + iJitter, currJ + jJitter, 0.0);
         }
     }
     return subPixels;
 }
 
-glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
+glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
+{
     PROFILE_FUNCTION();
     auto closestHit = _findHit(ray);
 
@@ -81,7 +88,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
                     for (int i = 0; i < NUM_JITTERS; i++) {
                         tempColor += _traceRay(_jitter(reflectionRay.get()).get(), depth + 1);
                     }
-                    reflectiveColor += tempColor / (double)NUM_JITTERS;
+                    reflectiveColor += tempColor / (double) NUM_JITTERS;
                 } else {
                     reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
                 }
@@ -100,7 +107,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
                     for (int i = 0; i < NUM_JITTERS; i++) {
                         tempColor += _traceRay(_jitter(reflectionRay.get()).get(), depth + 1);
                     }
-                    reflectiveColor += tempColor / (double)NUM_JITTERS;
+                    reflectiveColor += tempColor / (double) NUM_JITTERS;
                 } else {
                     reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
                 }
@@ -113,7 +120,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
                     for (int i = 0; i < NUM_JITTERS; i++) {
                         tempColor += _traceRay(_jitter(transmissionRay.get()).get(), depth + 1);
                     }
-                    transmissionColor += tempColor / (double)NUM_JITTERS;
+                    transmissionColor += tempColor / (double) NUM_JITTERS;
                 } else {
                     transmissionColor += _traceRay(transmissionRay.get(), depth + 1);
                 }
@@ -123,12 +130,18 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth) {
             color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
             break;
         }
+        case Textured: {
+            auto uv = hit->getTexCoords();
+            auto texture = material->getTexture();
+            color += texture->linear(uv);
+        }
     }
 
     return glm::clamp(color, 0.0, 1.0);
 }
 
-void Renderer::render(const std::string &outputFile) {
+void Renderer::render(const std::string &outputFile)
+{
     PROFILE_FUNCTION();
 
     auto image = std::vector<std::vector<glm::ivec3>>();
@@ -143,7 +156,8 @@ void Renderer::render(const std::string &outputFile) {
     _boundingBox = std::make_unique<BoundingBox>(_scene->getRawObjects());
     _boundingBox->subdivide();
 
-    auto loop = [&](int start, int end) {
+    auto loop = [&](int start, int end)
+    {
         for (uint32_t row = start; row < end; row++) {
             for (uint32_t col = 0; col < WIDTH; col++) {
                 auto dirs = _getWorldspaceCoords(row, col, WIDTH, HEIGHT, SUB_PIXELS);
@@ -166,7 +180,7 @@ void Renderer::render(const std::string &outputFile) {
         start += threadInc;
     }
 
-    for (auto& t : threads) {
+    for (auto &t: threads) {
         t.join();
     }
 
@@ -186,11 +200,13 @@ void Renderer::render(const std::string &outputFile) {
 }
 
 
-std::optional<std::unique_ptr<Rays::Hit>> Renderer::_findHit(Rays::Ray *ray) {
+std::optional<std::unique_ptr<Rays::Hit>> Renderer::_findHit(Rays::Ray *ray)
+{
     return _boundingBox->intersect(ray);
 }
 
-std::unique_ptr<Rays::Ray> Renderer::_jitter(Rays::Ray *ray) {
+std::unique_ptr<Rays::Ray> Renderer::_jitter(Rays::Ray *ray)
+{
     auto x = Renderer::_random() * JITTER_BIAS;
     auto y = Renderer::_random() * JITTER_BIAS;
     auto z = Renderer::_random() * JITTER_BIAS;

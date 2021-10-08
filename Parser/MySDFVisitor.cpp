@@ -149,7 +149,18 @@ antlrcpp::Any MySDFVisitor::visitPolygon(antlrcpp::SDFParser::PolygonContext *ct
 }
 
 antlrcpp::Any MySDFVisitor::visitTexTriangle(antlrcpp::SDFParser::TexTriangleContext *ctx) {
-    return SDFBaseVisitor::visitTexTriangle(ctx);
+    int mat_num = std::stoi(ctx->mat_num->getText());
+    glm::dvec3 p1 = visitPoint3(ctx->p1);
+    glm::dvec2 uv1 = visitPoint2(ctx->tex_coord1);
+    glm::dvec3 p2 = visitPoint3(ctx->p2);
+    glm::dvec2 uv2 = visitPoint2(ctx->tex_coord2);
+    glm::dvec3 p3 = visitPoint3(ctx->p3);
+    glm::dvec2 uv3 = visitPoint2(ctx->tex_coord3);
+
+    auto& material = _sceneDescription->getMaterials().at(mat_num);
+    auto triangle = std::make_unique<Triangle>(material, p1, uv1, p2, uv2, p3, uv3);
+    _sceneDescription->pushObject(std::move(triangle));
+    return triangle;
 }
 
 antlrcpp::Any MySDFVisitor::visitTexPolygon(antlrcpp::SDFParser::TexPolygonContext *ctx) {
@@ -194,3 +205,5 @@ std::unique_ptr<SceneDescription> MySDFVisitor::takeSceneDescription() {
 }
 
 MySDFVisitor::MySDFVisitor(): _sceneDescription(std::make_unique<SceneDescription>()) {}
+
+

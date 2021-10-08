@@ -5,6 +5,10 @@
 #include "Sphere.h"
 #include <glm.hpp>
 
+glm::dvec2 texCoords(const glm::dvec3& norm) {
+    return {asin(norm.x)/M_PI + 0.5, asin(norm.y)/M_PI + 0.5};
+}
+
 std::optional<std::unique_ptr<Rays::Hit>> Sphere::intersect(const Rays::Ray* ray) {
     PROFILE_FUNCTION();
     glm::dvec3 oc = _origin - ray->getOrigin();
@@ -46,7 +50,8 @@ std::optional<std::unique_ptr<Rays::Hit>> Sphere::intersect(const Rays::Ray* ray
 
     glm::dvec3 point = ray->getOrigin() + (ray->getDirection() * t);
     glm::dvec3 norm = glm::normalize((point - _origin));
-    return std::make_unique<Rays::Hit>(t, point, norm, this);
+    glm::dvec2 uv = texCoords(norm);
+    return std::make_unique<Rays::Hit>(t, point, norm, uv, this);
 }
 
 Sphere::Sphere(const std::unique_ptr<Material> &material, glm::dvec3 origin, double radius) : BaseRenderable(

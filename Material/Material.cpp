@@ -66,3 +66,8 @@ double Material::getGlossyFac() const {
 double Material::getTranslucencyFac() const {
     return _translucencyFac;
 }
+
+const Texture *Material::getTexture() const
+{
+    return _texture;
+}

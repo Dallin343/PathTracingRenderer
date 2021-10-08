@@ -1,39 +1,40 @@
-BACKGROUND Color 0.2 0.2 0.2
-AMBIENT AmbientFactor 0.1 Color 0.5 0.5 0.5
-DIRECTIONAL_LIGHT Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0
-POINT_LIGHT Origin -4.0 -4.0 2.0 Color 1.0 1.0 1.0
-POINT_LIGHT Origin -4.0 0.0 0.0 Color 0.8 0.6 0.2
-MATERIAL
+Background Color 0.2 0.2 0.2
+Ambient AmbientFactor 0.1 Color 0.5 0.5 0.5
+#DirectionalLight Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0 Intensity 1.0
+PointLight Origin -4.0 -4.0 2.0 Color 1.0 1.0 1.0 Intensity 100.0
+#PointLight Origin -4.0 0.0 0.0 Color 0.8 0.6 0.2
+
+Texture Index 1 File ../Assets/Textures/checkerboard.jpg
+
+Material
     Index 1
-    Type Diffuse
+    Type Textured
+    TextureNumber 1
+    #-
     DiffuseColor 0.4 0.45 0.5
     SpecularColor 1.0 1.0 1.0
     PhongConstant 2.0
     DiffuseFactor 1.0
     SpecularFactor 0.0
     ReflectiveFactor 0.5
+    -#
 
-MATERIAL
+Material
     Index 2
     Type Diffuse
-    DiffuseColor 0.8 0.1 0.1
+    DiffuseColor 0.4 0.45 0.5
     SpecularColor 1.0 1.0 1.0
-    PhongConstant 128.0
-    DiffuseFactor 0.6
-    SpecularFactor 0.4
-    ReflectiveFactor 0.5
+    PhongConstant 2.0
+    DiffuseFactor 0.4
+    SpecularFactor 0.0
+    ReflectiveFactor 0.6
+    GlossyFactor 0.1
 
-TRIANGLE
+Sphere MaterialNumber 1 Origin 0.0 0.0 0.0 Up -1.0 0.0 0.0 Right 0.0 1.0 0.0 Radius 2.0
+
+Triangle
     MaterialNumber 2
-    Point1 2.0 -6.0 -4.0
-    Point2 0.0 0.0 -8.0
-    Point3 -2.0 -6.0 -4.0
-
-#Floor
-TRIANGLE
-    MaterialNumber 1
     Point1 3.0 100.0 5.0
     Point2 -1.0 0.0 -50.0
     Point3 3.0 -100.0 5.0
-
-CAMERA LookFrom 0.0 0.0 5.0 LookAt 0.0 0.0 0.0 FieldOfView 90.0 90.0
+Camera LookFrom 0.0 0.0 5.0 LookAt 0.0 0.0 0.0 FieldOfView 90.0 90.0

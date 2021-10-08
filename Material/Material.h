@@ -54,6 +54,8 @@ public:
     double getIor() const;
 
     MaterialType getType() const;
+
+    const Texture *getTexture() const;
 };
 
 

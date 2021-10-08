@@ -5,15 +5,34 @@
 #include "Triangle.h"
 #include <algorithm>
 
+double calculateArea(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 p3) {
+    auto a = glm::length(p1 - p2);
+    auto b = glm::length(p1 - p3);
+    auto c = glm::length(p3 - p2);
+    return 0.25 * glm::sqrt((a+b+c) * (-a+b+c) * (a-b+c) * (a+b-c));
+}
+
 Triangle::Triangle(const std::unique_ptr<Material> &material, glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 p3)
-        : BaseRenderable(material), _p1(p1), _p2(p2), _p3(p3) {
+        : BaseRenderable(material), _p1(p1), _p2(p2), _p3(p3)
+{
 
     const double e = 0.1;
     _bounds.min = {std::min({_p1.x, _p2.x, _p3.x}), std::min({_p1.y, _p2.y, _p3.y}), std::min({_p1.z, _p2.z, _p3.z})};
     _bounds.max = {std::max({_p1.x, _p2.x, _p3.x}), std::max({_p1.y, _p2.y, _p3.y}), std::max({_p1.z, _p2.z, _p3.z})};
 }
 
-std::optional<std::unique_ptr<Rays::Hit>> Triangle::intersect(const Rays::Ray *ray) {
+Triangle::Triangle(const std::unique_ptr<Material> &material, glm::dvec3 p1, glm::dvec2 uv1, glm::dvec3 p2,
+                   glm::dvec2 uv2, glm::dvec3 p3, glm::dvec2 uv3)
+        : BaseRenderable(material), _p1(p1), _p2(p2), _p3(p3), _uv1(uv1), _uv2(uv2), _uv3(uv3)
+{
+
+    const double e = 0.1;
+    _bounds.min = {std::min({_p1.x, _p2.x, _p3.x}), std::min({_p1.y, _p2.y, _p3.y}), std::min({_p1.z, _p2.z, _p3.z})};
+    _bounds.max = {std::max({_p1.x, _p2.x, _p3.x}), std::max({_p1.y, _p2.y, _p3.y}), std::max({_p1.z, _p2.z, _p3.z})};
+}
+
+std::optional<std::unique_ptr<Rays::Hit>> Triangle::intersect(const Rays::Ray *ray)
+{
     PROFILE_FUNCTION();
     double e = 0.000001;
     glm::dvec3 w0 = ray->getOrigin() - _p2;
@@ -51,13 +70,22 @@ std::optional<std::unique_ptr<Rays::Hit>> Triangle::intersect(const Rays::Ray *r
         }
 
         auto norm = _calcNormal();
-        auto hit = std::make_unique<Rays::Hit>(t, point, norm, this);
+        glm::dvec2 texCoords = {};
+        auto totalArea = calculateArea(_p1, _p2, _p3);
+        auto p1Area = calculateArea(point, _p2, _p3) / totalArea;
+        auto p2Area = calculateArea(point, _p1, _p3) / totalArea;
+        auto p3Area = calculateArea(point, _p1, _p2) / totalArea;
+
+        glm::dvec2 texCoord = (p1Area * _uv1) + (p2Area * _uv2) + (p3Area * _uv3);
+
+        auto hit = std::make_unique<Rays::Hit>(t, point, norm, texCoord, this);
         return hit;
     }
     return std::nullopt;
 }
 
-glm::dvec3 Triangle::_calcNormal() {
+glm::dvec3 Triangle::_calcNormal()
+{
     glm::dvec3 v1 = _p1 - _p2;
     glm::dvec3 v2 = _p3 - _p2;
     return glm::normalize(glm::cross(v2, v1));

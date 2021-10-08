@@ -62,11 +62,16 @@ material: 'Material'
 sphere: 'Sphere' 'MaterialNumber' mat_num=Int 'Origin' origin=point3 'Up' up=point3 'Right' right=point3 'Radius' radius=Float;
 triangle: 'Triangle' 'MaterialNumber' mat_num=Int 'Point1' p1=point3 'Point2' p2=point3 'Point3' p3=point3;
 polygon: 'Polygon' 'MaterialNumber' mat_num=Int num_verts=Int vertex+;
-texTriangle: 'TexTriangle' 'MaterialNumber' mat_num=Int tex_vertex+;
+
+texTriangle: 'TexTriangle' 'MaterialNumber' mat_num=Int
+    'Point1' p1=point3 'TexCoord1' tex_coord1=point2
+    'Point2' p2=point3 'TexCoord2' tex_coord2=point2
+    'Point3' p3=point3 'TexCoord3' tex_coord3=point2;
+
 texPolygon: 'TexPolygon' tex_num=Int num_verts=Int tex_vertex+;
 
 vertex: p=point3 nrm=point3;
-tex_vertex: p=point3 nrm=point3 tex_coord=point2;
+tex_vertex: 'Point' p=point3 'Normal' nrm=point3 'TexCoord' tex_coord=point2;
 point2: x=Float y=Float | x=Int y=Int;
 point3: x=Float y=Float z=Float | x=Int y=Int z=Int;
 rgb: r=Float g=Float b=Float;
@@ -76,7 +81,7 @@ Float: '-' Int '.' Int | Int '.' Int;
 Int: Digit+;
 fragment Digit: [0-9];
 Space: [ \r\t\n]+ -> skip;
-Filepath: ('/'[^/ ]*)+'/'?;
+Filepath: ~[ \r\t\n]+;
 
 Comment: '#' ~[\r\n]* '\r'? '\n' -> skip;
 MultilineComment: '#-' .*? '-#' -> skip;
