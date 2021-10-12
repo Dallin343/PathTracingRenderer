@@ -5,11 +5,15 @@
 #include "Sphere.h"
 #include <glm.hpp>
 
-glm::dvec2 texCoords(const glm::dvec3& norm) {
-    return {asin(norm.x)/M_PI + 0.5, asin(norm.y)/M_PI + 0.5};
+glm::dvec2 Sphere::texCoords(const glm::dvec3 &norm)
+{
+    auto localNorm = norm * _cob;
+
+    return {atan2(localNorm.z, localNorm.x) / (2 * M_PI) + 0.5, 0.5 - asin(localNorm.y) / M_PI};
 }
 
-std::optional<std::unique_ptr<Rays::Hit>> Sphere::intersect(const Rays::Ray* ray) {
+std::optional<std::unique_ptr<Rays::Hit>> Sphere::intersect(const Rays::Ray *ray)
+{
     PROFILE_FUNCTION();
     glm::dvec3 oc = _origin - ray->getOrigin();
     double tca = glm::dot(oc, ray->getDirection());
@@ -55,7 +59,19 @@ std::optional<std::unique_ptr<Rays::Hit>> Sphere::intersect(const Rays::Ray* ray
 }
 
 Sphere::Sphere(const std::unique_ptr<Material> &material, glm::dvec3 origin, double radius) : BaseRenderable(
-        material), _origin(origin),_radius(radius) {
+        material), _origin(origin), _radius(radius)
+{
     _bounds.min = _origin - _radius;
     _bounds.max = _origin + _radius;
+}
+
+Sphere::Sphere(const std::unique_ptr<Material> &material, glm::dvec3 origin, double radius, glm::dvec3 up,
+               glm::dvec3 right) : BaseRenderable(material), _origin(origin), _radius(radius), _up(up), _right(right)
+{
+    _bounds.min = _origin - _radius;
+    _bounds.max = _origin + _radius;
+    _in = glm::cross(up, right);
+
+    glm::dmat3 localBasis = {_right, _up, _in};
+    _cob = WORLD_BASIS * localBasis;
 }

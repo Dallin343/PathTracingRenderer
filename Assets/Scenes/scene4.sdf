@@ -4,16 +4,16 @@ Ambient AmbientFactor 0.1 Color 0.5 0.5 0.5
 #PointLight Origin -4.0 -4.0 2.0 Color 1.0 1.0 1.0
 #PointLight Origin -4.0 0.0 0.0 Color 0.8 0.6 0.2
 
-Texture Index 1 File ../Assets/Textures/soccerball.jpeg
+Texture Index 1 File ../Assets/Textures/linus.jpg
 
 Material
     Index 1
     Type Textured
     TextureNumber 1
 
-Sphere MaterialNumber 1 Origin 0.0 -4.5 0.0 Up -1.0 0.0 0.0 Right 0.0 1.0 0.0 Radius 2.0
+Sphere MaterialNumber 1 Origin 0.0 -4.5 0.0 Up 1.0 0.0 0.0 Right 0.0 1.0 0.0 Radius 2.0
 Sphere MaterialNumber 1 Origin 0.0 0.0 0.0 Up -1.0 0.0 0.0 Right 0.0 1.0 0.0 Radius 2.0
-Sphere MaterialNumber 1 Origin 0.0 4.5 0.0 Up -1.0 0.0 0.0 Right 0.0 1.0 0.0 Radius 2.0
+Sphere MaterialNumber 1 Origin 0.0 4.5 0.0 Up -1.0 0.0 0.0 Right 0.0 -1.0 0.0 Radius 2.0
 
 
 Camera LookFrom 0.0 0.0 5.0 LookAt 0.0 0.0 0.0 FieldOfView 90.0 90.0

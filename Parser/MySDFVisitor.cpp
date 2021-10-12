@@ -127,7 +127,7 @@ antlrcpp::Any MySDFVisitor::visitSphere(antlrcpp::SDFParser::SphereContext *ctx)
     int mat_num = std::stoi(ctx->mat_num->getText());
 
     auto& material = _sceneDescription->getMaterials().at(mat_num);
-    auto sphere = std::make_unique<Sphere>(material, origin, radius);
+    auto sphere = std::make_unique<Sphere>(material, origin, radius, up, right);
     _sceneDescription->pushObject(std::move(sphere));
     return sphere;
 }

@@ -21,6 +21,12 @@ const uint32_t SUB_PIXELS = 4;
 const int WIDTH = 480;
 const int HEIGHT = 480;
 
+const glm::dmat3 WORLD_BASIS = {
+        {1.0, 0.0, 0.0},
+        {0.0, 1.0, 0.0},
+        {0.0, 0.0, -1.0}
+};
+
 const double BIAS = 1e-6;
 const int NUM_SHADOW_SAMPLES = 20;
 

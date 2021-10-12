@@ -1,9 +1,7 @@
-BACKGROUND Color 0.2 0.2 0.2
-AMBIENT AmbientFactor 0.1 Color 0.5 0.5 0.5
-DIRECTIONAL_LIGHT Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0
-POINT_LIGHT Origin -4.0 -4.0 2.0 Color 1.0 1.0 1.0
-POINT_LIGHT Origin -4.0 0.0 0.0 Color 0.8 0.6 0.2
-MATERIAL
+Background Color 0.2 0.2 0.2
+Ambient AmbientFactor 0.1 Color 0.5 0.5 0.5
+
+Material
     Index 1
     Type Diffuse
     DiffuseColor 0.4 0.45 0.5
@@ -14,7 +12,22 @@ MATERIAL
     ReflectiveFactor 0.6
     GlossyFactor 0.1
 
-MATERIAL
+#-
+DirectionalLight Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0
+PointLight Origin -4.0 -4.0 2.0 Color 1.0 1.0 1.0
+PointLight Origin -4.0 0.0 0.0 Color 0.8 0.6 0.2
+Material
+    Index 1
+    Type Diffuse
+    DiffuseColor 0.4 0.45 0.5
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 2.0
+    DiffuseFactor 0.4
+    SpecularFactor 0.0
+    ReflectiveFactor 0.6
+    GlossyFactor 0.1
+
+Material
     Index 2
     Type Transparent
     ReflectiveFactor 0.1
@@ -23,7 +36,7 @@ MATERIAL
     TranslucencyFactor 0.1
     IndexOfRefraction 1.08
 
-MATERIAL
+Material
     Index 3
     Type Diffuse
     DiffuseColor 0.5 0.2 1.0
@@ -34,7 +47,7 @@ MATERIAL
     ReflectiveFactor 0.5
     GlossyFactor 0.6
 
-MATERIAL
+Material
     Index 4
     Type Diffuse
     DiffuseColor 0.0 0.0 1.0
@@ -45,7 +58,7 @@ MATERIAL
     ReflectiveFactor 0.1
     GlossyFactor 0.6
 
-MATERIAL
+Material
     Index 5
     Type Diffuse
     DiffuseColor 0.0 1.0 0.0
@@ -56,7 +69,7 @@ MATERIAL
     ReflectiveFactor 0.0
     GlossyFactor 0.6
 
-MATERIAL
+Material
     Index 6
     Type Diffuse
     DiffuseColor 1.0 0.0 0.0
@@ -67,22 +80,23 @@ MATERIAL
     ReflectiveFactor 0.1
     GlossyFactor 0.6
 
-TRIANGLE
+Triangle
     MaterialNumber 4
     Point1 2.0 -6.0 -4.0
     Point2 0.0 0.0 -8.0
     Point3 -2.0 -6.0 -4.0
 
 #Floor
-##-
-TRIANGLE
+Triangle
     MaterialNumber 1
     Point1 3.0 100.0 5.0
     Point2 -1.0 0.0 -50.0
     Point3 3.0 -100.0 5.0
-#-#
-SPHERE MaterialNumber 2 Origin 0.0 -0.4 1.0 Radius 1.6
-SPHERE MaterialNumber 3 Origin 1.3 1.3 3.0 Radius 0.5
-SPHERE MaterialNumber 5 Origin 1.0 2.0 -2.0 Radius 1.5
 
-CAMERA LookFrom 0.0 0.0 5.0 LookAt 0.0 0.0 0.0 FieldOfView 90.0 90.0
+Sphere MaterialNumber 2 Origin 0.0 -0.4 1.0 Radius 1.6
+Sphere MaterialNumber 3 Origin 1.3 1.3 3.0 Radius 0.5
+Sphere MaterialNumber 5 Origin 1.0 2.0 -2.0 Radius 1.5
+
+-#
+Sphere MaterialNumber 1 Origin 0.0 0.0 0.0 Up 0.0 0.0 0.0 Right 0.0 0.0 0.0 Radius 1.0
+Camera LookFrom 0.0 0.0 0.0 LookAt 0.0 0.0 5.0 FieldOfView 90.0 90.0
