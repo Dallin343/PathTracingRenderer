@@ -33,6 +33,9 @@ public:
 
     Material(const Texture* texture);
 
+    Material(const Texture* texture, double diffuseFac, double specularFac, double reflectiveFac, double glossy,
+             double phongConst, const glm::dvec3 &specularColor);
+
     double getDiffuseFac() const;
 
     double getReflectiveFac() const;

@@ -51,12 +51,14 @@ material: 'Material'
         |
     type='Textured'
         'TextureNumber' tex_num=Int
-        'SpecularColor' ks_rgb=rgb
+        ('SpecularColor' ks_rgb=rgb
         'PhongConstant' n=Float
         'DiffuseFactor' kd=Float
         'SpecularFactor' ks=Float
         'ReflectiveFactor' kr=Float
         'GlossyFactor' kg=Float
+        |
+        )
     );
 
 sphere: 'Sphere' 'MaterialNumber' mat_num=Int 'Origin' origin=point3 'Up' up=point3 'Right' right=point3 'Radius' radius=Float;

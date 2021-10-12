@@ -102,8 +102,20 @@ antlrcpp::Any MySDFVisitor::visitMaterial(antlrcpp::SDFParser::MaterialContext *
     } else if (type == "Textured") {
         int texNum = std::stoi(ctx->tex_num->getText());
         auto& tex = _sceneDescription->getTextures().at(texNum);
-        auto mat = std::make_unique<Material>(tex.get());
-        _sceneDescription->insertMaterial(num, std::move(mat));
+
+        if (ctx->ks_rgb) {
+            glm::dvec3 ksRgb = visitRgb(ctx->ks_rgb);
+            double n = std::stod(ctx->n->getText());
+            double kd = std::stod(ctx->kd->getText());
+            double ks = std::stod(ctx->ks->getText());
+            double kr = std::stod(ctx->kr->getText());
+            double kg = std::stod(ctx->kg->getText());
+            auto mat = std::make_unique<Material>(tex.get(), kd, ks, kr, kg, n, ksRgb);
+            _sceneDescription->insertMaterial(num, std::move(mat));
+        } else {
+            auto mat = std::make_unique<Material>(tex.get());
+            _sceneDescription->insertMaterial(num, std::move(mat));
+        }
     }
 
     return num;
