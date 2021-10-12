@@ -77,7 +77,13 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
     glm::dvec3 transmissionColor = {0.0, 0.0, 0.0};
 
     switch (material->getType()) {
-        case Diffuse: {
+        case Textured:
+//        {
+//            auto uv = hit->getTexCoords();
+//            auto texture = material->getTexture();
+//            color += texture->linear(uv);
+//        }
+        case Diffuse:
             PROFILE_SCOPE("Diffuse Tracing");
             color = Lighting::calculateIllumination(ray, hit.get(), material, _scene.get());
             if (material->getReflectiveFac() > 0.0) {
@@ -96,7 +102,6 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
             color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
             color += _scene->getAmbientColor() * _scene->getAmbientFac() * material->getDiffuseColor();
             break;
-        }
         case Transparent: {
             PROFILE_SCOPE("Transparent Tracing");
             if (material->getReflectiveFac() > 0.0) {
@@ -129,11 +134,6 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
             color = reflectiveColor * kr + transmissionColor * (1 - kr);
             color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
             break;
-        }
-        case Textured: {
-            auto uv = hit->getTexCoords();
-            auto texture = material->getTexture();
-            color += texture->linear(uv);
         }
     }
 

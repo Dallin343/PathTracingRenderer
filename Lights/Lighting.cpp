@@ -79,8 +79,15 @@ namespace Lighting {
 
         glm::dvec3 color = light->getColor() * light->attenuate(hit->getPoint(), position);
 
-        double angle = glm::max(glm::dot(nrm, position), 0.0);
-        diffuse = material->getDiffuseFac() * material->getDiffuseColor() * angle * color;
+        double angle;
+        if (material->getType() == Textured) {
+            auto uv = hit->getTexCoords();
+            auto texture = material->getTexture();
+            diffuse = texture->linear(uv) * material->getDiffuseFac();
+        } else {
+            angle = glm::max(glm::dot(nrm, position), 0.0);
+            diffuse = material->getDiffuseFac() * material->getDiffuseColor() * angle * color;
+        }
 
         //Specular
         glm::dvec3 reflection = glm::normalize(position - 2.0 * nrm * glm::dot(nrm, position));

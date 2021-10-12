@@ -1,7 +1,7 @@
 Background Color 0.2 0.2 0.2
 Ambient AmbientFactor 0.1 Color 0.5 0.5 0.5
-#DirectionalLight Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0
-#PointLight Origin -4.0 -4.0 2.0 Color 1.0 1.0 1.0
+DirectionalLight Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0 Intensity 1.0
+PointLight Origin -4.0 -4.0 2.0 Color 1.0 1.0 1.0 Intensity 100.0
 #PointLight Origin -4.0 0.0 0.0 Color 0.8 0.6 0.2
 
 Texture Index 1 File ../Assets/Textures/linus.jpg
@@ -10,6 +10,12 @@ Material
     Index 1
     Type Textured
     TextureNumber 1
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 32.0
+    DiffuseFactor 0.6
+    SpecularFactor 0.2
+    ReflectiveFactor 0.1
+    GlossyFactor 0.6
 
 Sphere MaterialNumber 1 Origin 0.0 -4.5 0.0 Up 1.0 0.0 0.0 Right 0.0 1.0 0.0 Radius 2.0
 Sphere MaterialNumber 1 Origin 0.0 0.0 0.0 Up -1.0 0.0 0.0 Right 0.0 1.0 0.0 Radius 2.0
