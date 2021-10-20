@@ -20,9 +20,11 @@ class Renderer {
 private:
     std::optional<std::unique_ptr<Rays::Hit>> _findHit(Rays::Ray *ray);
     glm::dvec3 _traceRay(Rays::Ray* ray, uint8_t depth = 0);
+    glm::dvec3 _pathTraceRay(Rays::Ray* ray, uint8_t depth = 0);
 
     std::unique_ptr<Rays::Ray> _jitter(Rays::Ray* ray);
     std::vector<glm::dvec3> _getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t height, uint32_t sub);
+    std::unique_ptr<Rays::Ray> _selectRayPath(Rays::Ray *ray, Rays::Hit* hit);
 
 public:
     Renderer();

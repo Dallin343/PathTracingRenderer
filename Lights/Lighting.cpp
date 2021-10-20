@@ -155,4 +155,50 @@ namespace Lighting {
             return (Rs * Rs + Rp * Rp) / 2.0;
         }
     }
+
+    std::unique_ptr<Rays::ReflectionRay> randomDiffuse(const Rays::Ray *ray, const Rays::Hit *hit) {
+        double theta = 2 * M_PI * _random();
+        double phi = glm::acos(glm::sqrt(_random()));
+
+        auto norm = hit->getNorm();
+        auto origin = hit->getPoint();
+        auto dir = ray->getDirection();
+
+        auto proj = glm::normalize(dir - (glm::dot(norm, dir) / glm::pow(glm::length(norm), 2)) * norm);
+
+        auto reflection = _vectorInHemisphere(proj, norm, theta, phi);
+        return std::make_unique<Rays::ReflectionRay>(origin, reflection);
+    }
+
+
+    std::unique_ptr<Rays::ReflectionRay> randomSpecular(const Rays::Ray *ray, const Rays::Hit *hit) {
+        auto reflRay = reflect(ray, hit);
+        double theta = 2 * M_PI * _random();
+        double phi = glm::acos(glm::sqrt(_random() * 0.1));
+
+        auto localZ = reflRay->getDirection();
+        auto origin = hit->getPoint();
+        auto dir = ray->getDirection();
+
+        auto proj = glm::normalize(dir - (glm::dot(localZ, dir) / glm::pow(glm::length(localZ), 2)) * localZ);
+
+        auto reflection = _vectorInHemisphere(proj, localZ, theta, phi);
+        return std::make_unique<Rays::ReflectionRay>(origin, reflection);
+    }
+
+    std::unique_ptr<Rays::TransmissionRay> randomRefraction(const Rays::Ray *ray, const Rays::Hit *hit) {
+        double e1 = _random();
+        double e2 = _random();
+        double theta = 2 * M_PI * e1;
+        double phi = glm::acos(glm::sqrt(e2));
+
+        return std::unique_ptr<Rays::TransmissionRay>();
+    }
+
+    glm::dvec3 _vectorInHemisphere(glm::dvec3 localX, glm::dvec3 localZ, double theta, double phi) {
+        auto localY = glm::normalize(glm::cross(localX, localZ));
+
+        glm::dvec3 azimuth = glm::cos(theta)*localX + glm::sin(theta)*localY;
+        glm::dvec3 zenith = glm::cos(phi)*azimuth + glm::sin(phi)*localZ;
+    }
 }

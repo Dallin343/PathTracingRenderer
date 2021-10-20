@@ -60,12 +60,13 @@ Renderer::_getWorldspaceCoords(uint32_t i, uint32_t j, uint32_t width, uint32_t 
 glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
 {
     PROFILE_FUNCTION();
-    auto closestHit = _findHit(ray);
+    if (depth > MAX_DEPTH) {
+        return {};
+    }
 
+    auto closestHit = _findHit(ray);
     if (!closestHit.has_value()) {
         return _scene->getBackground();
-    } else if (depth > MAX_DEPTH) {
-        return {};
     }
 
     auto hit = std::move(closestHit.value());
@@ -141,6 +142,14 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
     return glm::clamp(color, 0.0, 1.0);
 }
 
+glm::dvec3 Renderer::_pathTraceRay(Rays::Ray *ray, uint8_t depth) {
+    PROFILE_FUNCTION();
+    if (depth > MAX_DEPTH) {
+        return {};
+    }
+    return glm::dvec3();
+}
+
 void Renderer::render(const std::string &outputFile)
 {
     PROFILE_FUNCTION();
@@ -214,5 +223,21 @@ std::unique_ptr<Rays::Ray> Renderer::_jitter(Rays::Ray *ray)
     glm::dvec3 rand = {x, y, z};
     return std::make_unique<Rays::Ray>(ray->getOrigin(), glm::normalize(ray->getDirection() + rand));
 }
+
+std::unique_ptr<Rays::Ray> Renderer::_selectRayPath(Rays::Ray *ray, Rays::Hit *hit) {
+    auto mat = hit->getObject()->getMaterial();
+    double tot = mat->getDiffuseFac() + mat->getSpecularFac() + mat->getTransmissionFac();
+    double randomChoice = _random() * tot;
+    if (randomChoice < mat->getDiffuseFac()) {
+        return 
+    } else if (randomChoice < mat->getDiffuseFac() + mat->getSpecularFac()) {
+
+    } else {
+
+    }
+
+    return std::unique_ptr<Rays::Ray>();
+}
+
 
 

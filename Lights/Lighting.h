@@ -14,6 +14,10 @@
 #include "Rays/Hit.h"
 
 namespace Lighting {
+    std::uniform_real_distribution<double> _distro{0.0, 1.0};
+    std::default_random_engine _engine;
+    auto _random = std::bind(_distro, _engine);
+
     bool inShadow(const Rays::Ray*, const Light*, const std::vector<std::unique_ptr<BaseRenderable>> &);
     
     glm::dvec3 calculateIllumination(const Rays::Ray*, const Rays::Hit*, const Material*, const SceneDescription*);
@@ -24,6 +28,12 @@ namespace Lighting {
     std::unique_ptr<Rays::ReflectionRay> reflect(const Rays::Ray *, const Rays::Hit *);
     std::unique_ptr<Rays::TransmissionRay> refract(const Rays::Ray *, const Rays::Hit *);
     double fresnel(const Rays::Ray *, const Rays::Hit *);
+
+    std::unique_ptr<Rays::ReflectionRay> randomDiffuse(const Rays::Ray *, const Rays::Hit *);
+    std::unique_ptr<Rays::ReflectionRay> randomSpecular(const Rays::Ray *, const Rays::Hit *);
+    std::unique_ptr<Rays::TransmissionRay> randomRefraction(const Rays::Ray *, const Rays::Hit *);
+    glm::dvec3 _vectorInHemisphere(glm::dvec3 localX, glm::dvec3 localZ, double theta, double phi);
+
 
     glm::dvec3 _calculateIllumination(const Rays::Ray*, const Rays::Hit*, const Light*, const glm::dvec3&, const Material*, const Camera*);
 };
