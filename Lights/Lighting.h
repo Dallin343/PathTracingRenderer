@@ -25,8 +25,8 @@ namespace Lighting {
     std::unique_ptr<Rays::TransmissionRay> refract(const Rays::Ray *, const Rays::Hit *);
     double fresnel(const Rays::Ray *, const Rays::Hit *);
 
-    std::unique_ptr<Rays::ReflectionRay> randomDiffuse(const Rays::Ray *, const Rays::Hit *);
-    std::unique_ptr<Rays::ReflectionRay> randomSpecular(const Rays::Ray *, const Rays::Hit *);
+    std::unique_ptr<Rays::ReflectionRay> randomDiffuse(const Rays::Ray *, const Rays::Hit *, double&);
+    std::unique_ptr<Rays::ReflectionRay> randomSpecular(const Rays::Ray *, const Rays::Hit *, double&);
     std::unique_ptr<Rays::TransmissionRay> randomRefraction(const Rays::Ray *, const Rays::Hit *);
     glm::dvec3 _vectorInHemisphere(glm::dvec3 localX, glm::dvec3 localZ, double theta, double phi);
 

@@ -1,17 +1,36 @@
 Background Color 0.2 0.2 0.2
 Ambient AmbientFactor 0.2 Color 1.0 1.0 1.0
-DirectionalLight Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0 Intensity 1.0
+PointLight Origin 4.0 -4.0 2.0 Color 1.0 1.0 1.0 Intensity 400.0
 
 Material
     Index 1
     Type Diffuse
-    DiffuseColor 1.0 0.0 0.0
+    DiffuseColor 0.8 0.2 0.0
     SpecularColor 1.0 1.0 1.0
     PhongConstant 32.0
-    DiffuseFactor 0.7
-    SpecularFactor 0.3
+    DiffuseFactor 1.0
+    SpecularFactor 0.0
     ReflectiveFactor 0.0
-    GlossyFactor 0.6
+    GlossyFactor 0.0
+
+Material
+    Index 2
+    Type Diffuse
+    DiffuseColor 0.2 0.8 0.0
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 32.0
+    DiffuseFactor 1.0
+    SpecularFactor 0.0
+    ReflectiveFactor 0.0
+    GlossyFactor 0.0
+
+#Floor
+
+Triangle
+    MaterialNumber 2
+    Point1 1.0 100.0 5.0
+    Point2 -1.0 0.0 -50.0
+    Point3 1.0 -100.0 5.0
 
 Sphere MaterialNumber 1 Origin 0.0 0.0 0.0 Up -1.0 0.0 0.0 Right 0.0 1.0 0.0 Radius 2.0
 

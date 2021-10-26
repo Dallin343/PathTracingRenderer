@@ -16,14 +16,14 @@
 
 #define GI true
 
-const uint8_t MAX_DEPTH = 4;
+const uint8_t MAX_DEPTH = 2;
 const int NUM_JITTERS = 2;
 const double JITTER_BIAS = 0.1;
-const int NUM_THREADS = 1;
+const int NUM_THREADS = 6;
 const uint32_t SUB_PIXELS = 2;
-const int WIDTH = 480;
-const int HEIGHT = 480;
-const int PATH_SAMPLES = 4;
+const int WIDTH = 200;
+const int HEIGHT = 200;
+const int PATH_SAMPLES = 32;
 
 class Util {
 public:

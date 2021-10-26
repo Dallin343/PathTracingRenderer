@@ -12,7 +12,7 @@ namespace Lighting {
         Nb = glm::cross(N, Nt);
     }
 
-    glm::dvec3 uniformSampleHemisphere(const float &r1, const float &r2)
+    glm::dvec3 uniformSampleHemisphere(const double &r1, const double &r2)
     {
         double sinTheta = sqrtf(1 - r1 * r1);
         double phi = 2.0 * M_PI * r2;
@@ -57,7 +57,7 @@ namespace Lighting {
                           const SceneDescription *scene) {
         const glm::dvec3 &lightPos = light->getPosition();
         const glm::dvec3 dir = glm::normalize(lightPos - hit->getPoint());
-        const glm::dvec3 adjOrigin = hit->getPoint() + hit->getNorm() * BIAS;
+        const glm::dvec3 adjOrigin = hit->getPoint() + dir * BIAS;
         auto shadowRay = std::make_unique<Rays::Ray>(adjOrigin, dir);
         if (!inShadow(shadowRay.get(), light, scene->getObjects())) {
             return _calculateIllumination(ray, hit, light, light->getPosition(), material, scene->getCamera());
@@ -91,7 +91,7 @@ namespace Lighting {
     _calculateIllumination(const Rays::Ray *ray, const Rays::Hit *hit, const Light *light, const glm::dvec3 &position,
                            const Material *material, const Camera *camera) {
         //Diffuse
-        glm::dvec3 diffuse, specular;
+        glm::dvec3 diffuse{}, specular{};
 
         glm::dvec3 nrm = hit->getNorm();
 
@@ -103,8 +103,9 @@ namespace Lighting {
             auto texture = material->getTexture();
             diffuse = texture->linear(uv) * material->getDiffuseFac();
         } else {
-            angle = glm::max(glm::dot(nrm, position), 0.0);
-            diffuse = material->getDiffuseFac() * material->getDiffuseColor() * angle * color;
+            return color * glm::max(glm::dot(nrm, position), 0.0);
+//            angle = glm::max(glm::dot(nrm, position), 0.0);
+//            diffuse = material->getDiffuseFac() * material->getDiffuseColor() * angle * color;
         }
 
         //Specular
@@ -174,14 +175,28 @@ namespace Lighting {
         }
     }
 
-    std::unique_ptr<Rays::ReflectionRay> randomDiffuse(const Rays::Ray *ray, const Rays::Hit *hit) {
+    std::unique_ptr<Rays::ReflectionRay> randomDiffuse(const Rays::Ray *ray, const Rays::Hit *hit, double& cosTheta) {
 
-        double theta = 2 * M_PI * Util::_random();
-        double phi = glm::acos(glm::sqrt(Util::_random()));
+        double r1 = Util::_random();
+        double r2 = Util::_random();
+        double theta = 2 * M_PI * r1;
+        double phi = glm::acos(glm::sqrt(r2));
+
+        cosTheta = r1;
 
         auto norm = hit->getNorm();
         auto origin = hit->getPoint();
         auto dir = ray->getDirection();
+//
+//        glm::dvec3 Nt, Nb;
+//        createCoordinateSystem(norm, Nt, Nb);
+//        glm::dvec3 sample = uniformSampleHemisphere(r1, r2);
+//        glm::dvec3 sampleWorld = {
+//                sample.x * Nb.x + sample.y * norm.x + sample.z * Nt.x,
+//                sample.x * Nb.y + sample.y * norm.y + sample.z * Nt.y,
+//                sample.x * Nb.z + sample.y * norm.z + sample.z * Nt.z
+//        };
+//        return std::make_unique<Rays::ReflectionRay>(origin + sampleWorld * BIAS, sampleWorld);
 
         auto proj = glm::normalize(dir - (glm::dot(norm, dir) / glm::pow(glm::length(norm), 2)) * norm);
         auto reflection = _vectorInHemisphere(proj, norm, theta, phi);
@@ -189,7 +204,7 @@ namespace Lighting {
     }
 
 
-    std::unique_ptr<Rays::ReflectionRay> randomSpecular(const Rays::Ray *ray, const Rays::Hit *hit) {
+    std::unique_ptr<Rays::ReflectionRay> randomSpecular(const Rays::Ray *ray, const Rays::Hit *hit, double& cosTheta) {
         auto reflRay = reflect(ray, hit);
         double theta = 2 * M_PI * Util::_random();
         double phi = glm::acos(glm::sqrt(Util::_random() * 0.1));

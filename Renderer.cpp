@@ -65,6 +65,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
 
     auto closestHit = _findHit(ray);
     if (!closestHit.has_value()) {
+        //return {1.0, 1.0, 1.0};
         return _scene->getBackground();
     }
 
@@ -74,7 +75,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
     double pdf;
     const Material *material = object->getMaterial();
     glm::dvec3 directLighting = {0.0, 0.0, 0.0};
-    glm::dvec3 indirectLighting = {};
+    glm::dvec3 indirectLighting = {0.0, 0.0, 0.0};
     glm::dvec3 reflectiveColor = {0.0, 0.0, 0.0};
     glm::dvec3 transmissionColor = {0.0, 0.0, 0.0};
 
@@ -101,22 +102,25 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
 #if GI
             pdf = 1 / (2 * M_PI);
             for (int i = 0; i < PATH_SAMPLES; i++) {
-                auto path = _selectRayPath(ray, hit.get());
+                double cosTheta;
+                auto path = _selectRayPath(ray, hit.get(), cosTheta);
+                auto color = _traceRay(path.get(), depth + 1);
 
-                indirectLighting += _traceRay(path.get(), depth + 1) / pdf;
+                indirectLighting += cosTheta * color / pdf;
             }
             // divide by N
             indirectLighting /= (double)PATH_SAMPLES;
 #endif
 
-            directLighting = directLighting / M_PI + 2.0 * indirectLighting;
+            directLighting = (directLighting / M_PI + 2.0 * indirectLighting) * material->getDiffuseColor();
 
             if (material->getType() == Textured) {
                 auto texColor = material->getTexture()->linear(hit->getTexCoords());
                 directLighting += _scene->getAmbientColor() * _scene->getAmbientFac() * texColor;
             } else {
-                directLighting += _scene->getAmbientColor() * _scene->getAmbientFac() * material->getDiffuseColor();
+//                directLighting += _scene->getAmbientColor() * _scene->getAmbientFac() * material->getDiffuseColor();
             }
+//            std::cout << printVec(directLighting) << std::endl;
             break;
         case Transparent: {
             PROFILE_SCOPE("Transparent Tracing");
@@ -238,14 +242,14 @@ std::unique_ptr<Rays::Ray> Renderer::_jitter(Rays::Ray *ray)
     return std::make_unique<Rays::Ray>(ray->getOrigin(), glm::normalize(ray->getDirection() + rand));
 }
 
-std::unique_ptr<Rays::Ray> Renderer::_selectRayPath(Rays::Ray *ray, Rays::Hit *hit) {
+std::unique_ptr<Rays::Ray> Renderer::_selectRayPath(Rays::Ray *ray, Rays::Hit *hit, double& cosTheta) {
     auto mat = hit->getObject()->getMaterial();
     double tot = mat->getDiffuseFac() + mat->getSpecularFac() + mat->getTransmissionFac();
     double randomChoice = _random() * tot;
     if (randomChoice < mat->getDiffuseFac()) {
-        return Lighting::randomDiffuse(ray, hit);
+        return Lighting::randomDiffuse(ray, hit, cosTheta);
     } else if (randomChoice < mat->getDiffuseFac() + mat->getSpecularFac()) {
-        return Lighting::randomSpecular(ray, hit);
+        return Lighting::randomSpecular(ray, hit, cosTheta);
     } else {
 
     }
