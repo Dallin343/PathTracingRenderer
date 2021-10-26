@@ -13,7 +13,6 @@ std::string printVec(const glm::dvec3 &vec)
     return stream.str();
 }
 
-
 Renderer::Renderer() = default;
 
 Renderer::Renderer(std::unique_ptr<SceneDescription> scene)
@@ -72,8 +71,10 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
     auto hit = std::move(closestHit.value());
     auto object = hit->getObject();
 
+    double pdf;
     const Material *material = object->getMaterial();
-    glm::dvec3 color = {0.0, 0.0, 0.0};
+    glm::dvec3 directLighting = {0.0, 0.0, 0.0};
+    glm::dvec3 indirectLighting = {};
     glm::dvec3 reflectiveColor = {0.0, 0.0, 0.0};
     glm::dvec3 transmissionColor = {0.0, 0.0, 0.0};
 
@@ -81,7 +82,7 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
         case Textured:
         case Diffuse:
             PROFILE_SCOPE("Diffuse Tracing");
-            color = Lighting::calculateIllumination(ray, hit.get(), material, _scene.get());
+            directLighting = Lighting::calculateIllumination(ray, hit.get(), material, _scene.get());
             if (material->getReflectiveFac() > 0.0) {
                 PROFILE_SCOPE("Reflection");
                 auto reflectionRay = Lighting::reflect(ray, hit.get());
@@ -95,13 +96,26 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
                     reflectiveColor += _traceRay(reflectionRay.get(), depth + 1);
                 }
             }
-            color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
+            directLighting = glm::mix(directLighting, reflectiveColor, material->getReflectiveFac());
+
+#if GI
+            pdf = 1 / (2 * M_PI);
+            for (int i = 0; i < PATH_SAMPLES; i++) {
+                auto path = _selectRayPath(ray, hit.get());
+
+                indirectLighting += _traceRay(path.get(), depth + 1) / pdf;
+            }
+            // divide by N
+            indirectLighting /= (double)PATH_SAMPLES;
+#endif
+
+            directLighting = directLighting / M_PI + 2.0 * indirectLighting;
 
             if (material->getType() == Textured) {
                 auto texColor = material->getTexture()->linear(hit->getTexCoords());
-                color += _scene->getAmbientColor() * _scene->getAmbientFac() * texColor;
+                directLighting += _scene->getAmbientColor() * _scene->getAmbientFac() * texColor;
             } else {
-                color += _scene->getAmbientColor() * _scene->getAmbientFac() * material->getDiffuseColor();
+                directLighting += _scene->getAmbientColor() * _scene->getAmbientFac() * material->getDiffuseColor();
             }
             break;
         case Transparent: {
@@ -133,13 +147,13 @@ glm::dvec3 Renderer::_traceRay(Rays::Ray *ray, uint8_t depth)
                 }
             }
             double kr = Lighting::fresnel(ray, hit.get());
-            color = reflectiveColor * kr + transmissionColor * (1 - kr);
-            color = glm::mix(color, reflectiveColor, material->getReflectiveFac());
+            directLighting = reflectiveColor * kr + transmissionColor * (1 - kr);
+            directLighting = glm::mix(directLighting, reflectiveColor, material->getReflectiveFac());
             break;
         }
     }
 
-    return glm::clamp(color, 0.0, 1.0);
+    return glm::clamp(directLighting, 0.0, 1.0);
 }
 
 glm::dvec3 Renderer::_pathTraceRay(Rays::Ray *ray, uint8_t depth) {
@@ -229,9 +243,9 @@ std::unique_ptr<Rays::Ray> Renderer::_selectRayPath(Rays::Ray *ray, Rays::Hit *h
     double tot = mat->getDiffuseFac() + mat->getSpecularFac() + mat->getTransmissionFac();
     double randomChoice = _random() * tot;
     if (randomChoice < mat->getDiffuseFac()) {
-        return 
+        return Lighting::randomDiffuse(ray, hit);
     } else if (randomChoice < mat->getDiffuseFac() + mat->getSpecularFac()) {
-
+        return Lighting::randomSpecular(ray, hit);
     } else {
 
     }

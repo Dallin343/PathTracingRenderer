@@ -14,10 +14,6 @@
 #include "Rays/Hit.h"
 
 namespace Lighting {
-    std::uniform_real_distribution<double> _distro{0.0, 1.0};
-    std::default_random_engine _engine;
-    auto _random = std::bind(_distro, _engine);
-
     bool inShadow(const Rays::Ray*, const Light*, const std::vector<std::unique_ptr<BaseRenderable>> &);
     
     glm::dvec3 calculateIllumination(const Rays::Ray*, const Rays::Hit*, const Material*, const SceneDescription*);

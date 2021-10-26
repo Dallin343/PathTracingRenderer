@@ -1,0 +1,19 @@
+Background Color 0.2 0.2 0.2
+Ambient AmbientFactor 0.2 Color 1.0 1.0 1.0
+DirectionalLight Direction -2.0 3.0 1.0 Color 1.0 1.0 1.0 Intensity 1.0
+
+Material
+    Index 1
+    Type Diffuse
+    DiffuseColor 1.0 0.0 0.0
+    SpecularColor 1.0 1.0 1.0
+    PhongConstant 32.0
+    DiffuseFactor 0.7
+    SpecularFactor 0.3
+    ReflectiveFactor 0.0
+    GlossyFactor 0.6
+
+Sphere MaterialNumber 1 Origin 0.0 0.0 0.0 Up -1.0 0.0 0.0 Right 0.0 1.0 0.0 Radius 2.0
+
+
+Camera LookFrom 0.0 0.0 5.0 LookAt 0.0 0.0 0.0 FieldOfView 90.0 90.0

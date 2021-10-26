@@ -3,6 +3,24 @@
 #include "Material/Material.h"
 
 namespace Lighting {
+    void createCoordinateSystem(const glm::dvec3 &N, glm::dvec3 &Nt, glm::dvec3 &Nb)
+    {
+        if (std::fabs(N.x) > std::fabs(N.y))
+            Nt = glm::dvec3(N.z, 0, -N.x) / glm::sqrt(N.x * N.x + N.z * N.z);
+        else
+            Nt = glm::dvec3(0, -N.z, N.y) / glm::sqrt(N.y * N.y + N.z * N.z);
+        Nb = glm::cross(N, Nt);
+    }
+
+    glm::dvec3 uniformSampleHemisphere(const float &r1, const float &r2)
+    {
+        double sinTheta = sqrtf(1 - r1 * r1);
+        double phi = 2.0 * M_PI * r2;
+        double x = sinTheta * cos(phi);
+        double z = sinTheta * sin(phi);
+        return {x, r1, z};
+    }
+
     bool
     inShadow(const Rays::Ray *ray, const Light *light, const std::vector<std::unique_ptr<BaseRenderable>> &objects) {
         for (const auto &object: objects) {
@@ -157,24 +175,24 @@ namespace Lighting {
     }
 
     std::unique_ptr<Rays::ReflectionRay> randomDiffuse(const Rays::Ray *ray, const Rays::Hit *hit) {
-        double theta = 2 * M_PI * _random();
-        double phi = glm::acos(glm::sqrt(_random()));
+
+        double theta = 2 * M_PI * Util::_random();
+        double phi = glm::acos(glm::sqrt(Util::_random()));
 
         auto norm = hit->getNorm();
         auto origin = hit->getPoint();
         auto dir = ray->getDirection();
 
         auto proj = glm::normalize(dir - (glm::dot(norm, dir) / glm::pow(glm::length(norm), 2)) * norm);
-
         auto reflection = _vectorInHemisphere(proj, norm, theta, phi);
-        return std::make_unique<Rays::ReflectionRay>(origin, reflection);
+        return std::make_unique<Rays::ReflectionRay>(origin + reflection*BIAS, reflection);
     }
 
 
     std::unique_ptr<Rays::ReflectionRay> randomSpecular(const Rays::Ray *ray, const Rays::Hit *hit) {
         auto reflRay = reflect(ray, hit);
-        double theta = 2 * M_PI * _random();
-        double phi = glm::acos(glm::sqrt(_random() * 0.1));
+        double theta = 2 * M_PI * Util::_random();
+        double phi = glm::acos(glm::sqrt(Util::_random() * 0.1));
 
         auto localZ = reflRay->getDirection();
         auto origin = hit->getPoint();
@@ -187,8 +205,8 @@ namespace Lighting {
     }
 
     std::unique_ptr<Rays::TransmissionRay> randomRefraction(const Rays::Ray *ray, const Rays::Hit *hit) {
-        double e1 = _random();
-        double e2 = _random();
+        double e1 = Util::_random();
+        double e2 = Util::_random();
         double theta = 2 * M_PI * e1;
         double phi = glm::acos(glm::sqrt(e2));
 
@@ -200,5 +218,6 @@ namespace Lighting {
 
         glm::dvec3 azimuth = glm::cos(theta)*localX + glm::sin(theta)*localY;
         glm::dvec3 zenith = glm::cos(phi)*azimuth + glm::sin(phi)*localZ;
+        return zenith;
     }
 }

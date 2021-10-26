@@ -12,14 +12,25 @@
 #include <unordered_map>
 #include <optional>
 #include <Debug/Instrumentor.h>
+#include <random>
+
+#define GI true
 
 const uint8_t MAX_DEPTH = 4;
 const int NUM_JITTERS = 2;
 const double JITTER_BIAS = 0.1;
-const int NUM_THREADS = 2;
+const int NUM_THREADS = 1;
 const uint32_t SUB_PIXELS = 2;
 const int WIDTH = 480;
 const int HEIGHT = 480;
+const int PATH_SAMPLES = 4;
+
+class Util {
+public:
+    inline static std::uniform_real_distribution<double> _distro{0.0, 1.0};
+    inline static std::default_random_engine _engine;
+    inline static auto _random = std::bind(_distro, _engine);
+};
 
 const glm::dmat3 WORLD_BASIS = {
         {1.0, 0.0, 0.0},

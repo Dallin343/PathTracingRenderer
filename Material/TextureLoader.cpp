@@ -5,7 +5,7 @@
 #include "TextureLoader.h"
 
 namespace TextureLoader {
-    std::unique_ptr<Texture> TextureLoader::loadFromFile(const std::string &path) {
+    std::unique_ptr<Texture> loadFromFile(const std::string &path) {
         int width, height, num_channels;
 
         stbi_uc *data = stbi_load(path.c_str(), &width, &height, &num_channels, 3);
